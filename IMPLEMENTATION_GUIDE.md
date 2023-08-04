@@ -290,7 +290,7 @@ curl -s https://raw.githubusercontent.com/karmada-io/karmada/master/hack/install
 _Note: In order to avoid issues running the following command you have to allow incoming traffic for TCP port 32443 in the security group attached to the cluster node. If necessary add the appropriate security group that allows incoming traffic for TCP port 32443 to all 3 nodes of the Karmada cluster._
 
 ```bash
- kubectl-karmada init --karmada-apiserver-advertise-address $(kubectl get nodes -o jsonpath="{.items[0].status.addresses[?(@.type=='ExternalIP')].address}") --karmada-apiserver-replicas 3 --etcd-replicas 3 --etcd-storage-mode PVC --storage-classes-name ebs-sc --cert-external-dns="*.elb.${KARMADA_REGION}.[amazonaws.com](http://amazonaws.com/)" --kubeconfig /home/ec2-user/.kube/config
+ sudo -E env "PATH=$PATH" kubectl karmada init --karmada-apiserver-advertise-address $(kubectl get nodes -o jsonpath="{.items[0].status.addresses[?(@.type=='ExternalIP')].address}") --karmada-apiserver-replicas 3 --etcd-replicas 3 --etcd-storage-mode PVC --storage-classes-name ebs-sc --cert-external-dns="*.elb.${KARMADA_REGION}.amazonaws.com" --kubeconfig /home/ec2-user/.kube/config
 ```
 
 When the initialization is complete, karmada displays important information on how to join member cluster.
