@@ -6,13 +6,13 @@ This implementation guide describes architectural considerations and configurati
 
 The intended audience of this guide is infrastructure engineers, architects, system administrators, devops professionals and platform engineers who have practical experience architecting in the AWS Cloud and are familiar with Kubernetes technology.
 
-The purpose of this guide is to provide detailed instructions to deploy an independent Amazon EKS control cluster with Karmada. There are several pre-requisites and for demo purposes we assume the existance of two indepedent, kubernetes clusters to join as member to the federation.
+The purpose of this guide is to provide detailed instructions to deploy an independent Amazon EKS control cluster with Karmada. There are several pre-requisites and for demo purposes we assume the existence of two indepedent, kubernetes clusters to join as member to the federation.
 
 By implementing this guidance, you will be able to manage your kubernetes cluster workloads from a unified management point for all cluster, in other words, a single pane of glass. 
 
 ## Architecture Overview
 
-The diagram below outlines the architecture of a Karmada cluster that can manage two independent Amazon EKS clusters and build a cluster federation.
+The diagram below outlines the architecture of a Karmada cluster that can manage two independent Amazon EKS clusters.
 
 ![Karmada Architecture](karmada-architecture.png)
 
@@ -35,12 +35,12 @@ When you build systems on AWS infrastructure, security responsibilities are shar
 
 For the purspose of this guide you need to have already in place the following prerequisites:
 
-- An active "AWS Account" to deploy the main Amazon EKS cluster
-- Αn Amazon VPC with (a) three public subnets and enabled the option to auto-assign public IPv4 adressess, and three private subnets and disabled the option to auto-assign public IPv4 adressess across three different availability zones
-- An Internet Gateway and a NAT gateway to allow Internet access for all cluster nodes
-- A security group to allow inbound traffic to TCP port 32443
-- An [AWS Cloud9](https://aws.amazon.com/cloud9/) instance to deploy, access and manage the main cluster
-- A user with administrator access and an Access key/Secret access key to configure [AWS Command Line Interface](https://aws.amazon.com/cli/)(AWS CLI)
+- An active [AWS Account](https://docs.aws.amazon.com/accounts/latest/reference/welcome-first-time-user.html) to deploy the main Amazon EKS cluster
+- Αn [Amazon VPC](https://docs.aws.amazon.com/directoryservice/latest/admin-guide/gsg_create_vpc.html) with (a) three public [subnets](https://docs.aws.amazon.com/vpc/latest/userguide/create-subnets.html) and enabled the option to auto-assign public IPv4 adressess, and three private subnets and disabled the option to auto-assign public IPv4 adressess across three different availability zones
+- An [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html) and a [NAT gateway](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html) to allow Internet access for all cluster nodes
+- A [security group](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/working-with-security-groups.html) to allow inbound traffic to TCP port 32443
+- An [AWS Cloud9]([https://aws.amazon.com/cloud9/](https://docs.aws.amazon.com/cloud9/latest/user-guide/tutorial-create-environment.html) instance to deploy, access and manage the main cluster
+- A [user with administrator access](https://docs.aws.amazon.com/streams/latest/dev/setting-up.html) and an [Access key/Secret access key](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html) to configure [AWS Command Line Interface](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) (AWS CLI)
 
 ### Preparation
 
