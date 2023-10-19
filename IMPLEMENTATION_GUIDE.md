@@ -2,11 +2,11 @@
 
 ## Introduction
 
-This implementation guide describes architectural considerations and configuration steps for deploying a federated Kubernetes environment in Amazon Web Services (AWS) Cloud using [Amazon Elastic Kubernetes Service (Amazon EKS)](https://aws.amazon.com/eks/) and the open source [Kubernetes Armada (Karmada)](https://karmada.io/) project. Karmada is a Kubernetes management system, with advanced scheduling capabilities, that enables you to run your cloud-native applications across multiple Kubernetes clusters and clouds, with no changes to your applications.  This guide focuses on deploying Karmada on top of a highly available Amazon EKS cluster.
+This implementation guide describes architectural considerations and configuration steps for deploying a federated Kubernetes environment in Amazon Web Services (AWS) Cloud using [Amazon Elastic Kubernetes Service (Amazon EKS)](https://aws.amazon.com/eks/) and the open source [Kubernetes Armada (Karmada)](https://karmada.io/) project. Karmada is a Kubernetes management system with advanced scheduling capabilities, that enables you to run your cloud-native applications across multiple Kubernetes clusters and clouds, with no changes to your applications.  This guide focuses on deploying Karmada on top of a highly available Amazon EKS cluster.
 
 The intended audience of this guide is infrastructure engineers, architects, system administrators, devops professionals and platform engineers who have practical experience architecting in the AWS Cloud and are familiar with Kubernetes technology.
 
-The purpose of this guide is to provide detailed instructions to deploy an independent Amazon EKS control cluster with Karmada. There are several pre-requisites and for demo purposes we assume the existence of two indepedent, kubernetes clusters to join as member to the federation.
+The purpose of this guide is to provide detailed instructions to deploy an independent Amazon EKS control cluster with Karmada. There are several pre-requisites and for demo purposes we assume the existence of two indepedent, kubernetes clusters to join as members in Karmada. In this guide we assume you have created two [Amazon EKS clusters](https://docs.aws.amazon.com/eks/latest/userguide/create-cluster.html)
 
 By implementing this guidance, you will be able to manage your kubernetes cluster workloads from a unified management point for all cluster, in other words, a single pane of glass. 
 
@@ -18,8 +18,8 @@ The diagram below outlines the architecture of a Karmada cluster that can manage
 
 In a similar fashion you can:
 
-- Deploy highly available applications on multiple Amazon EKS clusters in close proximity to end users to reduce latency
-- Implement workloads compliant with local regulation about data residency
+- Deploy applications on multiple Amazon EKS clusters that provide a highly available environment
+- Create the infrastructure that caters for workloads compliant with local regulation about data residency
 
 ## Design considerations
 
@@ -308,7 +308,7 @@ _Note: In order to avoid issues running the following command you have to allow 
 
 When the initialization is complete, karmada displays important information on how to join member cluster.
 
-__Important:__ Note the security token and the CA cert hash. You will need them upon registering other Amazon EKS clusters to the Karmada federation.
+__Important:__ Note the security token and the CA cert hash. You will need them upon registering other Amazon EKS clusters to Karmada.
 
 ```bash
 (... output text ...)
@@ -463,7 +463,7 @@ ekseucl02   v1.27.6-eks-f8587cb   Push   True    9h
 eksuscl01   v1.27.6-eks-f8587cb   Push   True    9h
 ```
 
-At this point you have joined the clusters to the federation and you are able to access all [Karmada features](https://karmada.io/docs/key-features/features).
+At this point you have joined the clusters to Karmada and you are able to access all [Karmada features](https://karmada.io/docs/key-features/features).
 
 #### Register cluster with push mode
 
@@ -486,13 +486,13 @@ kubectl karmada register ${KARMADA_LB}:32443 \
 --cluster-name=<name_of_cluster_member>
 ```
 
-At this point you have joined the cluster to the federation and you are able to access all [Karmada features](https://karmada.io/docs/key-features/features). 
+At this point you have joined the cluster to Karmada and you are able to access all [Karmada features](https://karmada.io/docs/key-features/features). 
 
 ## Multi cluster scheduling with Karmada
 
 Karmada enables many advanced capabilities such as [multi-cluster scheduling](https://karmada.io/docs/userguide/scheduling/resource-propagating), [multi-cluster failover](https://karmada.io/docs/userguide/failover/failover-overview) or [autoscaling across different cluster](https://karmada.io/docs/userguide/autoscaling/federatedhpa). 
 
-As an example at this point, assume you have three clusters registered with Karmada. Two in in eu-central-1 region and one in us-east-1. You can deploy a simple nginx application that will span across all three clusters. You also want to equally spread the capacity across cluster in Europe and North America. Since you have two cluster in eu-central-1 region, you want each to have 25% of the pods in each thus you give a weight 1. For us-east-1 region you want to have 50% of pods in the only cluster available there thus you give a weight 2.
+As an example at this point, assume you have three clusters registered with Karmada. Two in in eu-central-1 region and one in us-east-1. You can deploy a simple nginx application that will span across all three clusters. You also want to equally spread the capacity across cluster in Europe and North America. Since you have two clusters in eu-central-1 region, you want each to have 25% of the pods, thus you give a weight 1. For the us-east-1 region you want to have 50% of pods in the only cluster available, thus you give a weight 2.
 
 1. Create a propagation policy that will give the required weights to different clusters. 
 
@@ -594,7 +594,7 @@ To remove the Karmada and the related resources, run the following command to de
 eksclt delete cluster —name ${KARMADA_CLUSTERNAME}
 ```
 
-_Note: check this https://karmada.io/docs/userguide/clustermanager/cluster-registration/#unregister-cluster_
+_Note: check [this link](https://karmada.io/docs/userguide/clustermanager/cluster-registration/#unregister-cluster) how to unregister the cluster._
 
 ## Cost
 
