@@ -134,7 +134,8 @@ KARMADA_CLUSTERNAME=karmada-parent
 _*Note*_: *This operation will take a few minutes*
 
 ```bash
-eksctl create cluster --nodes 3 --nodes-min 3 --nodes-max 3 --region ${KARMADA_REGION} \
+eksctl create cluster --nodes 3 --nodes-min 3 --nodes-max 3 \
+--region ${KARMADA_REGION} \
 --instance-prefix karmadaeks \
 --vpc-private-subnets ${KARMADA_PRIVATESUBNETS} \
 --vpc-public-subnets ${KARMADA_PUBLICSUBNETS} \
@@ -144,7 +145,11 @@ eksctl create cluster --nodes 3 --nodes-min 3 --nodes-max 3 --region ${KARMADA_R
 _Note: In order to allow AWS Management console access to the cluster, if you connect with different than the cli user, then execute the following command replacing where applicable with your actual username (KARMADA_ACCOUNTID is the account ID of your AWS account, as noted above)._
 
 ```bash
-eksctl create iamidentitymapping --cluster ${KARMADA_CLUSTERNAME} --arn ``arn:aws:iam::${KARMADA_ACCOUNTID}:user/<your_username>`` --username <your_username> --group system:masters --no-duplicate-arns
+eksctl create iamidentitymapping \
+--cluster ${KARMADA_CLUSTERNAME} \
+--arn "arn:aws:iam::${KARMADA_ACCOUNTID}:user/<your_username>" \
+--username <your_username> \
+--group system:masters --no-duplicate-arns
 ```
 
 8. Deploy the EBS add-on
@@ -152,26 +157,34 @@ eksctl create iamidentitymapping --cluster ${KARMADA_CLUSTERNAME} --arn ``arn:aw
  - In case it does not exist already, associate the IAM OIDC provider
 
 ```bash
-eksctl utils associate-iam-oidc-provider --region=${KARMADA_REGION} --cluster=${KARMADA_CLUSTERNAME} --approve
+eksctl utils associate-iam-oidc-provider \
+--region=${KARMADA_REGION} \
+--cluster=${KARMADA_CLUSTERNAME} \
+--approve
 ```
 
  - Create the necessary IAM service account for the EBS CSI controller
 
 ```bash
-eksctl create iamserviceaccount --cluster ${KARMADA_CLUSTERNAME} \
+eksctl create iamserviceaccount \
+--cluster ${KARMADA_CLUSTERNAME} \
+--region ${KARMADA_REGION} \
 --name ebs-csi-controller-sa \
 --namespace kube-system  \
 --attach-policy-arn arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy \
---approve --role-only --role-name AmazonEKS_EBS_CSI_DriverRole
+--approve --role-only \
+--role-name AmazonEKS_EBS_CSI_DriverRole
 ```
 
  - Deploy the EBS add-on
 
 ```bash
-eksctl create addon --cluster ${KARMADA_CLUSTERNAME} \
+eksctl create addon \
+--cluster ${KARMADA_CLUSTERNAME} \
+--region ${KARMADA_REGION} \
 --name aws-ebs-csi-driver \
---service-account-role-arn \
-arn:aws:iam::${KARMADA_ACCOUNTID}:role/AmazonEKS_EBS_CSI_DriverRole --force
+--service-account-role-arn arn:aws:iam::${KARMADA_ACCOUNTID}:role/AmazonEKS_EBS_CSI_DriverRole \
+--force
 ```
 
  - Create the configuration for a storage class for the EBS storage.
@@ -370,17 +383,95 @@ KARMADA_LB=$(kubectl get svc -n karmada-system karmada-service-loadbalancer -o=j
 
 ### Join member cluster
 
-As of now you have deployed an EKS cluster with a highly avaliable Karmada API server and a Network Load Balancer to handle incoming traffic. The next step is to register you member cluster with Karmada.
-
-__Important:__ You must run the following commands on the member cluster.
+As of now you have deployed an EKS cluster with a highly avaliable Karmada API server and a Network Load Balancer to handle incoming traffic. The next step is to register you member clusters with Karmada. To do that Karmada offers two different methods, Push or Pull. Refer to [Karmada documentation](https://karmada.io/docs/userguide/clustermanager/cluster-registration) for more info.
 
 At the moment Karmada has a [limitation](https://github.com/karmada-io/karmada/blob/6089fa379427bda937cfe739d841e477f5ae6592/pkg/apis/cluster/validation/validation.go#L18) and the cluster name cannot be more than 48 chars. This is a blocker for the vast majority of Amazon EKS clusters as the cluster name is the ARN which is at least 44 characters. In order to overcome that we have to explicitly define the name of the member cluster to something less than 48 chars.
 
 It is recommended to use the friendly name of the EKS cluster and use **only** small Latin characters and numbers (no spaces, no capital letters, no symbols etc). More specifically, the name must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character (e.g. 'my-name', or '123-abc', regex used for validation is '[a-z0-9]([-a-z0-9]*[a-z0-9])?'
 
-1. Login to the management host for your member cluster, or change to the appropriate context so that kubectl communicates with the required member cluster (eg by issuing ‘*aws eks update-kubeconfig —region <region_name> —name <cluster_name>*’).
+Login to the management host for your member cluster, or change to the appropriate context so that kubectl communicates with the required member cluster. Edit directly the ~/.kube/config file to change the cluster name for the desired member cluster. Ensure that you have a __backup__ of the file before edit. Locate the cluster and context sections and alter the cluster named accordingly. In the following example you can see a full snippet of a config file for the cluster with name _myclustername.<region>.eksctl.io_ 
 
-2. If you have not already done it, install the karmada plugin
+```yaml
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority-data: 
+    (few lines of certificate data)
+    server: https://<id>.<region>.eks.amazonaws.com
+  name: myclustername.<region>.eksctl.io
+contexts:
+- context:
+    cluster: myclustername.<region>.eksctl.io
+    user: user@myclustername.<region>.eksctl.io
+  name: user@myclustername.<region>.eksctl.io
+current-context: myclustername.<region>.eksctl.io
+```
+
+Change the appropriate entries (clusters -> cluster -> name, contexts -> context -> cluster, context -> name, current-context) with a friendly and compliant name such as _myclustername_.
+
+```yaml
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority-data: 
+    (few lines of certificate data)
+    server: https://<id>.<region>.eks.amazonaws.com
+  name: myclustername
+contexts:
+- context:
+    cluster: myclustername
+    user: user@myclustername.<region>.eksctl.io
+  name: myclustername
+current-context: myclustername
+```
+
+#### Register cluster with pull mode
+
+Ensure you are logged in the Karmada management host and that you have the member clusters configured and accessible with the _kubectl_ utility. As an example we have three cluster that we are managing, two in Frankfurt region (eu-central-1) and one in the N. Virginia region (us-east-1).
+
+```bash
+user@bastion:~$ kubectl config get-contexts
+CURRENT   NAME                                  CLUSTER                          AUTHINFO                                NAMESPACE
+*         user@EKSUSMGT01.us-east-1.eksctl.io   EKSUSMGT01.us-east-1.eksctl.io   user@EKSUSMGT01.us-east-1.eksctl.io
+          ekseucl01                             ekseucl01                        user@EKSEUCL01.eu-central-1.eksctl.io
+          ekseucl02                             ekseucl02                        user@EKSEUCL02.eu-central-1.eksctl.io
+          eksuscl01                             eksuscl01                        user@EKSUSCL01.us-east-1.eksctl.io
+```
+
+1. Change context to the cluster you are registering to karmada
+
+```bash
+kubectl config use-context ekseucl01
+```
+
+2. Register the cluster to karmada
+
+```bash
+user@bastion:~$ sudo -E env "PATH=$PATH" kubectl karmada --kubeconfig /etc/karmada/karmada-apiserver.config join ekseucl01 --cluster-kubeconfig=$HOME/.kube/config
+cluster(ekseucl01) is joined successfully
+```
+
+3. Repeat the previous steps for the other clusters as well
+
+4. Check karmada cluser status
+
+```bash
+user@bastion:~$ sudo kubectl --kubeconfig /etc/karmada/karmada-apiserver.config get clusters
+NAME        VERSION               MODE   READY   AGE
+ekseucl01   v1.27.6-eks-f8587cb   Push   True    9h
+ekseucl02   v1.27.6-eks-f8587cb   Push   True    9h
+eksuscl01   v1.27.6-eks-f8587cb   Push   True    9h
+```
+
+At this point you have joined the clusters to the federation and you are able to access all [Karmada features](https://karmada.io/docs/key-features/features).
+
+#### Register cluster with push mode
+
+The registration of a member cluster with push mode requires accessing a cluster from a host that has no karmada components install. This method also deploys in your cluster the karmada-agent so that it can push information and commands from the Karmada API server. You also have to make sure that your cluster and the management host can access the Karmada API server (ex. over internet, through VPC peering, etc).
+
+1. Login to the host that you can access the member cluster
+
+2. Install the karmada plugin
 
 ```bash
 curl -s https://raw.githubusercontent.com/karmada-io/karmada/master/hack/install-cli.sh | sudo bash -s kubectl-karmada
@@ -395,7 +486,105 @@ kubectl karmada register ${KARMADA_LB}:32443 \
 --cluster-name=<name_of_cluster_member>
 ```
 
-At this point you have joined the first cluster to the federation and you are able to access all [Karmada features](https://karmada.io/docs/key-features/features). 
+At this point you have joined the cluster to the federation and you are able to access all [Karmada features](https://karmada.io/docs/key-features/features). 
+
+## Multi cluster scheduling with Karmada
+
+Karmada enables many advanced capabilities such as [multi-cluster scheduling](https://karmada.io/docs/userguide/scheduling/resource-propagating), [multi-cluster failover](https://karmada.io/docs/userguide/failover/failover-overview) or [autoscaling across different cluster](https://karmada.io/docs/userguide/autoscaling/federatedhpa). 
+
+As an example at this point, assume you have three clusters registered with Karmada. Two in in eu-central-1 region and one in us-east-1. You can deploy a simple nginx application that will span across all three clusters. You also want to equally spread the capacity across cluster in Europe and North America. Since you have two cluster in eu-central-1 region, you want each to have 25% of the pods in each thus you give a weight 1. For us-east-1 region you want to have 50% of pods in the only cluster available there thus you give a weight 2.
+
+1. Create a propagation policy that will give the required weights to different clusters. 
+
+```yaml
+apiVersion: policy.karmada.io/v1alpha1
+kind: PropagationPolicy
+metadata:
+  name: sample-propagation
+spec:
+  resourceSelectors:
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: nginx
+  placement:
+    clusterAffinity:
+      clusterNames:
+        - ekseucl01
+        - ekseucl02
+        - eksuscl01
+    replicaScheduling:
+      replicaDivisionPreference: Weighted
+      replicaSchedulingType: Divided
+      weightPreference:
+        staticWeightList:
+          - targetCluster:
+              clusterNames:
+                - ekseucl01
+                - ekseucl02
+            weight: 1
+          - targetCluster:
+              clusterNames:
+                - eksuscl01
+            weight: 2
+```
+
+2. If necessary switch to the right context so that you run commands against the Karmada management cluster
+
+```bash
+user@bastion:~$ kubectl config use-context user@EKSUSMGT01.us-east-1.eksctl.io
+Switched to context "user@EKSUSMGT01.us-east-1.eksctl.io".
+karmadapets@ip-172-16-11-165:~$ kubectl config get-contexts
+CURRENT   NAME                                  CLUSTER                          AUTHINFO                                NAMESPACE
+*         user@EKSUSMGT01.us-east-1.eksctl.io   EKSUSMGT01.us-east-1.eksctl.io   user@EKSUSMGT01.us-east-1.eksctl.io
+          ekseucl01                             ekseucl01                        user@EKSEUCL01.eu-central-1.eksctl.io
+          ekseucl02                             ekseucl02                        user@EKSEUCL02.eu-central-1.eksctl.io
+          eksuscl01                             eksuscl01                        user@EKSUSCL01.us-east-1.eksctl.io
+```
+
+3. Apply the propagation policy
+
+```bash
+user@bastion:~$ sudo kubectl --kubeconfig /etc/karmada/karmada-apiserver.config create -f propagation-policy.yaml
+propagationpolicy.policy.karmada.io/sample-propagation created
+```
+
+4. Create the nginx deployment with 12 replicas. 
+
+```bash
+user@bastion:~$ sudo kubectl --kubeconfig /etc/karmada/karmada-apiserver.config create deployment nginx --image nginx --replicas=12
+deployment.apps/nginx created
+```
+
+5. Check that you get 6 replicas in North America and 3 replicas in each cluster in Europe.
+
+```bash
+user@bastion:~$ kubectl config use-context eksuscl01
+Switched to context "eksuscl01".
+user@bastion:~$ kubectl get pod -l app=nginx
+NAME                     READY   STATUS    RESTARTS   AGE
+nginx-77b4fdf86c-c5f6b   1/1     Running   0          2m39s
+nginx-77b4fdf86c-g5fnr   1/1     Running   0          2m39s
+nginx-77b4fdf86c-kw42g   1/1     Running   0          2m39s
+nginx-77b4fdf86c-qcvt2   1/1     Running   0          2m39s
+nginx-77b4fdf86c-r5phj   1/1     Running   0          2m39s
+nginx-77b4fdf86c-rns48   1/1     Running   0          2m39s
+
+user@bastion:~$ kubectl config use-context ekseucl01
+Switched to context "ekseucl01".
+user@bastion:~$ kubectl get pod -l app=nginx
+NAME                     READY   STATUS    RESTARTS   AGE
+nginx-77b4fdf86c-2zd49   1/1     Running   0          4m40s
+nginx-77b4fdf86c-5pcvf   1/1     Running   0          4m40s
+nginx-77b4fdf86c-c7w8q   1/1     Running   0          4m40s
+
+user@bastion:~$ kubectl config use-context ekseucl02
+Switched to context "ekseucl02".
+user@bastion:~$ kubectl get pod -l app=nginx
+NAME                     READY   STATUS    RESTARTS   AGE
+nginx-77b4fdf86c-bhftk   1/1     Running   0          4m48s
+nginx-77b4fdf86c-bp4jr   1/1     Running   0          4m48s
+nginx-77b4fdf86c-txjk5   1/1     Running   0          4m48s
+```
 
 ## Uninstall
 
