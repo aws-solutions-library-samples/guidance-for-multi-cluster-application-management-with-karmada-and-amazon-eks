@@ -58,7 +58,7 @@ unzip awscliv2.zip
 sudo ./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli --update
 ```
 
-1. Install the *eksctl* utility to deploy and manage Amazon EKS clusters in your account.
+2. Install the *eksctl* utility to deploy and manage Amazon EKS clusters in your account.
 
 ```bash
 cd /tmp
@@ -68,7 +68,7 @@ chmod +x eksctl
 sudo mv /tmp/eksctl /usr/local/bin
 ```
 
-1. Install the kubectl utility to interact with your Kubernetes clusters
+3. Install the kubectl utility to interact with your Kubernetes clusters
 
 ```bash
 cd /tmp
@@ -77,7 +77,7 @@ chmod +x ./kubectl
 sudo mv kubectl /usr/local/bin
 ```
 
-1. Install the jq utility to process JSON output from various commands
+4. Install the jq utility to process JSON output from various commands
 
 ```bash
 sudo yum install jq
@@ -109,13 +109,13 @@ KARMADA_VPCID=$(aws ec2 describe-vpcs --filter "Name=tag:Name,Values=*<name_of_V
 KARMADA_PRIVATESUBNETS=$(aws ec2 describe-subnets --filters "Name=vpc-id,Values=${KARMADA_VPCID}" --query 'Subnets[?MapPublicIpOnLaunch==`false`].SubnetId' | jq -r '. | @csv')
 ```
 
-1. Get public subnets for this VPC in environment variable KARMADA_PUBLICSUBNETS. Based on the pre-requisites the criteria for identifying a public subnet is to have the *MapPublicIpOnLaunch* paremeter set to true.
+2. Get public subnets for this VPC in environment variable KARMADA_PUBLICSUBNETS. Based on the pre-requisites the criteria for identifying a public subnet is to have the *MapPublicIpOnLaunch* paremeter set to true.
 
 ```bash
 KARMADA_PUBLICSUBNETS=$(aws ec2 describe-subnets --filters "Name=vpc-id,Values=${KARMADA_VPCID}" --query 'Subnets[?MapPublicIpOnLaunch==`true`].SubnetId' | jq -r '. | @csv')
 ```
 
-1. Define some environment variables to define the account id, the AWS region to deploy the Amazon EKS main cluster and the preferred cluster name.
+3. Define some environment variables to define the account id, the AWS region to deploy the Amazon EKS main cluster and the preferred cluster name.
 
 **Note:** The KARMADA_REGION variable denoted the region actually used by the CLI regardless of whether environment variables are or are not set_
 
@@ -126,13 +126,13 @@ KARMADA_CLUSTERNAME=karmada-parent
 KARMADA_HOME=~/.karmada
 ```
 
-1. Create the karmada home directory. This is within your user's home directory so that you do not need sudo access to run karmada related commands.
+4. Create the karmada home directory. This is within your user's home directory so that you do not need sudo access to run karmada related commands.
 
 ```bash
 mkdir -p ${KARMADA_HOME}
 ```
 
-1. Deploy an Amazon EKS cluster with three nodes
+5. Deploy an Amazon EKS cluster with three nodes
 
 **Note:** *This operation will take a few minutes*
 
@@ -155,9 +155,9 @@ eksctl create iamidentitymapping \
 --group system:masters --no-duplicate-arns
 ```
 
-1. Deploy the EBS add-on
+6. Deploy the EBS add-on
 
-   1. In case it does not exist already, associate the IAM OIDC provider
+   a. In case it does not exist already, associate the IAM OIDC provider
 
 ```bash
 eksctl utils associate-iam-oidc-provider \
@@ -166,7 +166,7 @@ eksctl utils associate-iam-oidc-provider \
 --approve
 ```
 
-   1. Create the necessary IAM service account for the EBS CSI controller. In case you have already done it in another region, please adjust the role-name accordingly.
+   b. Create the necessary IAM service account for the EBS CSI controller. In case you have already done it in another region, please adjust the role-name accordingly.
 
 ```bash
 eksctl create iamserviceaccount \
@@ -179,7 +179,7 @@ eksctl create iamserviceaccount \
 --role-name AmazonEKS_EBS_CSI_DriverRole
 ```
 
-  1. Deploy the EBS add-on using the role-name from the previous step
+  c. Deploy the EBS add-on using the role-name from the previous step
 
 ```bash
 eksctl create addon \
@@ -190,7 +190,7 @@ eksctl create addon \
 --force
 ```
 
-  1. Create the configuration for a storage class for the EBS storage.
+  d. Create the configuration for a storage class for the EBS storage.
 
 ```bash
 cat > ebs-sc.yaml <<EOF
@@ -205,7 +205,7 @@ parameters:
 EOF
 ```
 
-  1. Create the storage class
+  e. Create the storage class
 
 ```bash
 kubectl apply -f ./ebs-sc.yaml
@@ -213,7 +213,7 @@ kubectl apply -f ./ebs-sc.yaml
 
 **Important:** In case this commands fails with access denied errors, you may need to remove the *'aws_session_token ='* line from the ~/.aws.credentials file.
 
-1. Verify the operation of the Amazon EKS cluster
+7. Verify the operation of the Amazon EKS cluster
 
 Verify cluster resources and status either by using the AWS Management Console or the kubectl utility. Some of the things to check.
 
@@ -301,13 +301,13 @@ You are now ready to deploy Karmada. This will allow you to extend the capabilit
 curl -s https://raw.githubusercontent.com/karmada-io/karmada/master/hack/install-cli.sh | sudo bash -s kubectl-karmada
 ```
 
-1. Create the karmada system namespace so you can create the load balancer for Karmada in the right namespace
+2. Create the karmada system namespace so you can create the load balancer for Karmada in the right namespace
 
 ```bash
 kubectl create namespace karmada-system 
 ```
 
-1. Prepare the deployment of a [Network Load Balancer](https://aws.amazon.com/elasticloadbalancing/network-load-balancer/) to make the Karmada API server highly available. The load balancer is the entry point to interact with the Karmada API server and forwards traffic to any healthy backend node.
+3. Prepare the deployment of a [Network Load Balancer](https://aws.amazon.com/elasticloadbalancing/network-load-balancer/) to make the Karmada API server highly available. The load balancer is the entry point to interact with the Karmada API server and forwards traffic to any healthy backend node.
 
 ```bash
 cat <<EOF > loadbalancer.yaml
@@ -332,13 +332,13 @@ spec:
 EOF
 ```
 
-1. Deploy the Network Load Balancer
+4. Deploy the Network Load Balancer
 
 ```bash
 kubectl apply -f loadbalancer.yaml
 ```
 
-1. Wait for the load balancer to become *Active* and then get the load balancer's hostname to use with Karmada.
+5. Wait for the load balancer to become *Active* and then get the load balancer's hostname to use with Karmada.
 
 **Note:** It is very important to wait for the load balancer to become active, else you risk hitting errors with DNS resolving in the next steps.
 
@@ -346,7 +346,7 @@ kubectl apply -f loadbalancer.yaml
 KARMADA_LB=$(kubectl get svc -n karmada-system karmada-service-loadbalancer -o=jsonpath='{.status.loadBalancer.ingress[0].hostname}')
 ```
 
-1. Initialize karmada using the one of the public IP addresses of the load balancer as the advertised karmada API server endpoint. You should also add the wildcard domain name for AWS load balancers to the API server certificate.
+6. Initialize karmada using the one of the public IP addresses of the load balancer as the advertised karmada API server endpoint. You should also add the wildcard domain name for AWS load balancers to the API server certificate.
 
 ```bash
  kubectl karmada init \
@@ -463,16 +463,16 @@ CURRENT   NAME                                  CLUSTER                         
 kubectl config use-context ekseucl01
 ```
 
-1. Register the cluster to karmada
+2. Register the cluster to karmada
 
 ```bash
 kubectl karmada join --kubeconfig ${KARMADA_HOME}/karmada-apiserver.config ekseucl01
 cluster(ekseucl01) is joined successfully
 ```
 
-1. Repeat the previous steps for the other clusters as well
+3. Repeat the previous steps for the other clusters as well
 
-1. Check karmada cluser status
+4. Check karmada cluser status
 
 ```bash
 kubectl --kubeconfig ${KARMADA_HOME}/karmada-apiserver.config get clusters
@@ -490,13 +490,13 @@ The registration of a member cluster with push mode requires accessing a cluster
 
 1. Login to a host that can access the member cluster
 
-1. Install the karmada plugin
+2. Install the karmada plugin
 
 ```bash
 curl -s https://raw.githubusercontent.com/karmada-io/karmada/master/hack/install-cli.sh | sudo bash -s kubectl-karmada
 ```
 
-1. Run the command below to register this cluster with Karmada, using the load balancer IP you have from previous step and also the token and certification hash you have noted also before during the Karmada API installation.
+3. Run the command below to register this cluster with Karmada, using the load balancer IP you have from previous step and also the token and certification hash you have noted also before during the Karmada API installation.
 
 ```bash
 kubectl karmada register ${KARMADA_LB}:32443 \
@@ -513,7 +513,7 @@ Karmada enables many advanced capabilities such as [multi-cluster scheduling](ht
 
 As an example at this point, assume you have three clusters registered with Karmada. Two in in eu-central-1 region and one in us-east-1. You can deploy a simple nginx application that will span across all three clusters. You also want to equally spread the capacity across cluster in Europe and North America. Since you have two clusters in eu-central-1 region, you want each to have 25% of the pods, thus you give a weight 1. For the us-east-1 region you want to have 50% of pods in the only cluster available, thus you give a weight 2.
 
-1. Create a propagation policy that will give the required weights to different clusters.
+4. Create a propagation policy that will give the required weights to different clusters.
 
 ```yaml
 apiVersion: policy.karmada.io/v1alpha1
@@ -547,7 +547,7 @@ spec:
             weight: 2
 ```
 
-1. If necessary switch to the right context so that you run commands against the Karmada management cluster
+5. If necessary switch to the right context so that you run commands against the Karmada management cluster
 
 ```bash
 kubectl config use-context user@EKSUSMGT01.us-east-1.eksctl.io
@@ -563,21 +563,21 @@ CURRENT   NAME                                  CLUSTER                         
           eksuscl01                             eksuscl01                        user@EKSUSCL01.us-east-1.eksctl.io
 ```
 
-1. Apply the propagation policy
+6. Apply the propagation policy
 
 ```bash
 kubectl --kubeconfig ${KARMADA_HOME}/karmada-apiserver.config create -f propagation-policy.yaml
 propagationpolicy.policy.karmada.io/sample-propagation created
 ```
 
-1. Create the nginx deployment with 12 replicas.
+7. Create the nginx deployment with 12 replicas.
 
 ```bash
 kubectl --kubeconfig ${KARMADA_HOME}/karmada-apiserver.config create deployment nginx --image nginx --replicas=12
 deployment.apps/nginx created
 ```
 
-1. Check that you get 6 replicas in North America and 3 replicas in each cluster in Europe.
+8. Check that you get 6 replicas in North America and 3 replicas in each cluster in Europe.
 
 ```bash
 # Switch to eksuscl01
