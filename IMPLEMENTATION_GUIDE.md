@@ -301,6 +301,12 @@ You are now ready to deploy Karmada. This will allow you to extend the capabilit
 curl -s https://raw.githubusercontent.com/karmada-io/karmada/master/hack/install-cli.sh | sudo bash -s kubectl-karmada
 ```
 
+1. Create the karmada system namespace so you can create the load balancer for Karmada in the right namespace
+
+```bash
+kubectl create namespace karmada-system 
+```
+
 1. Prepare the deployment of a [Network Load Balancer](https://aws.amazon.com/elasticloadbalancing/network-load-balancer/) to make the Karmada API server highly available. The load balancer is the entry point to interact with the Karmada API server and forwards traffic to any healthy backend node.
 
 ```bash
