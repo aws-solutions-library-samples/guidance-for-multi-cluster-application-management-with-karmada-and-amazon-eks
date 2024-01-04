@@ -403,7 +403,7 @@ At the moment Karmada has a [limitation](https://github.com/karmada-io/karmada/b
 
 It is recommended to use the friendly name of the EKS cluster and use **only** small Latin characters and numbers (no spaces, no capital letters, no symbols etc). More specifically, the name must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character (e.g. 'my-name', or '123-abc', regex used for validation is '[a-z0-9]([-a-z0-9]*[a-z0-9])?'
 
-Login to the management host for your member cluster, or change to the appropriate context so that kubectl communicates with the required member cluster. Edit directly the ~/.kube/config file to change the cluster name for the desired member cluster. Ensure that you have a **backup** of the file before edit. Locate the cluster and context sections and alter the cluster named accordingly. In the following example you can see a full snippet of a config file for the cluster with name *myclustername.<region>.eksctl.io*
+Login to the management host for your member cluster, or change to the appropriate context so that kubectl communicates with the required member cluster. Edit directly the ~/.kube/config file to change the cluster name for the desired member cluster. Ensure that you have a **backup** of the file before editting it. Locate the cluster and context sections and alter the cluster named accordingly. In the following example you can see a full snippet of a config file for the cluster with name *myclustername.<region>.eksctl.io*
 
 ```yaml
 apiVersion: v1
