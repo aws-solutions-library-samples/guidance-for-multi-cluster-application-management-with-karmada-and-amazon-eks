@@ -18,7 +18,7 @@ KARMADA_HOME="${HOME}/.karmada"
 CLUSTER_NAMES="" # to be used only for cleanup operations
 
 # Let's parse any command line parameters
-while getopts ":e:v:r:c:n:p:m:a:s:k:dhu" opt; do
+while getopts ":e:v:r:c:n:p:m:a:s:k:dhzu" opt; do
   case $opt in
     e) EKS_VERSION="${OPTARG}";;
     v) VPC_NAME="${OPTARG}";;
@@ -31,6 +31,7 @@ while getopts ":e:v:r:c:n:p:m:a:s:k:dhu" opt; do
     s) MEMBER_CLUSTER_NUM="${OPTARG}";;
     k) KARMADA_HOME="${OPTARG}/.karmada";;
     u) UNATTENDED="true";;
+    z) SKIP_UTILS="true";;
     d) DELETE="true";;
     h) 
         echo "Usage: $0 [args]"
@@ -47,6 +48,8 @@ while getopts ":e:v:r:c:n:p:m:a:s:k:dhu" opt; do
         echo "  -s Number of member cluster       (default: 2)"
         echo "  -k Karmada home directory         (default: ~ --- this results in your karmada config to be in ~/.karmada directory)"
         echo "  -u Unattended installation        (do not ask for confirmation, to allow unattended deployment)"
+        echo ""
+        echo "  -z Skip utilities installation    (ensure you have installed and configure the utilities: jq, awscli v2, eksctl, kubectl)"
         echo ""
         echo "  -d clean up the deployment        (delete EKS clusters with the prefix, cleanup karmada home dir)"
         echo ""
@@ -78,12 +81,40 @@ function cleanup () {
 
 trap cleanup EXIT
 
+function running_on () {
+    local unameout
+    unameout="$(uname -s)"
+
+    case "${unameout}" in
+        Linux*)     RUNNINGON=Linux;;
+        Darwin*)    RUNNINGON=Mac;;
+        CYGWIN*)    RUNNINGON=Cygwin;;
+        MINGW*)     RUNNINGON=MinGw;;
+        *)          RUNNINGON="UNKNOWN:${unameout}"
+    esac
+}
+
+function resolve_ip () {
+    if [ "${RUNNINGON}" == "Mac" ]; then
+        ping -c 1 ${1} | grep "^PING" | cut -f2 -d\( | cut -f1 -d\)        
+    elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+        ping -4 -c 1 ${1} | grep "^PING" | cut -f2 -d\( | cut -f1 -d\)
+    elif [ "${RUNNINGON}" == "Cygwin" ]; then
+        ping -4 -n 1 ${1} | grep "^Pinging" | cut -f2 -d\[ | cut -f1 -d\]
+    fi
+}
+
 # Find the correct package manager for the OS
 function os_package_manager () {
-    # Check the OS package manager
-    command -v apt-get > /dev/null && PKGINSTALL="sudo apt-get -y"
-    command -v dnf > /dev/null && PKGINSTALL="sudo dnf -y"
-    command -v yum > /dev/null && PKGINSTALL="sudo yum -y"
+    if [ "$RUNNINGON" == "Linux" ]; then
+        # Check the OS package manager
+        command -v apt-get > /dev/null && PKGINSTALL="sudo apt-get -y"
+        command -v dnf > /dev/null && PKGINSTALL="sudo dnf -y"
+        command -v yum > /dev/null && PKGINSTALL="sudo yum -y"
+    else
+        echo_red "It seems your are running on a non-supported Linux distribution.\nPlease you have installed the utilities jq, aws cli v2, eksctl, kubectl and run the script again with the -z option"
+        exit 1
+    fi
 }
 
 function install_os_packages () {
@@ -353,8 +384,8 @@ function eks_karmada_deploy () {
     # we use the public IP address of the first network load balancer instance as the kube api does not support multiple IP addresses
     # This is required for the init phase and internal karmada sync operations. All user-facing operation go through the load balancer DNS name
     echo_orange "\t${uni_circle_quarter} deploy Karmada api server\n"
-    #local worker_node_ip=$(kubectl get nodes -o jsonpath="{.items[0].status.addresses[?(@.type=='ExternalIP')].address}")
-    karmada_lb_ip=$(getent hosts "${KARMADA_LB}" | head -1 | cut -f1 -d' ')
+
+    karmada_lb_ip=$(resolve_ip "${KARMADA_LB}")
     [[ -z ${karmada_lb_ip} ]] && { echo_red " ${uni_x} Could not determine the load balancer IP address\n"; exit 5; }
     kubectl karmada init \
      --karmada-apiserver-advertise-address "${karmada_lb_ip}" \
@@ -519,16 +550,24 @@ if [[ ${UNATTENDED} != "true" ]]; then
 fi
 
 echo_green "${uni_right_triangle} Checking prerequisites\n"
-os_package_manager
-install_os_packages
-install_kubectl
-install_eksctl
-install_awscli
+
+# check the OS
+running_on
+
+# if -z option is not present then proceed with check and install of utilities
+if [[ ${SKIP_UTILS} != "true" ]]; then
+    # check the OS package manager
+    os_package_manager
+    install_os_packages
+    install_kubectl
+    install_eksctl
+    install_awscli
+fi
 
 echo_green "${uni_right_triangle} Prepare some parameters\n"
 # If not user-defined EKS version, retreive and use the latest available
-if [[ "${EKS_VERSION}" == "latest "]]; then
-    EKS_VERSION="$(aws eks describe-addon-versions | jq -r ".addons[] | .addonVersions[] | .compatibilities[] | .clusterVersion" | sort | uniq | tail -1)"  
+if [[ "${EKS_VERSION}" == "latest" ]]; then
+    EKS_VERSION="$(aws eks describe-addon-versions --region "${REGION}" --output json | jq -r ".addons[] | .addonVersions[] | .compatibilities[] | .clusterVersion" | sort | uniq | tail -1)"
 fi
 
 VPCID="$(aws ec2 describe-vpcs --region "${REGION}" --filter "Name=tag:Name,Values=*${VPC_NAME}*" --query "Vpcs[].VpcId" --output text)"
