@@ -346,7 +346,7 @@ kubectl apply -f loadbalancer.yaml
 KARMADA_LB=$(kubectl get svc -n karmada-system karmada-service-loadbalancer -o=jsonpath='{.status.loadBalancer.ingress[0].hostname}')
 ```
 
-6. Initialize karmada using the one of the public IP addresses of the load balancer as the advertised karmada API server endpoint. You should also add the wildcard domain name for AWS load balancers to the API server certificate.
+6. Initialize karmada using one of the public IP addresses of the load balancer as the advertised karmada API server endpoint. You should also add the wildcard domain name for AWS load balancers to the API server certificate.
 
 ```bash
  kubectl karmada init \
