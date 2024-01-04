@@ -466,11 +466,8 @@ function eks_karmada_demo_deploy () {
         [[ $? -eq 0 ]] && { sleep 10; echo_green " ${uni_check}\n"; } || { echo_red " ${uni_x}\n"; exit 5; }
     fi
 
-    for i in {1..2}; do
-        echo_orange "\t${uni_circle_quarter} check deployment in cluster ${CLUSTERS_NAME}-member-${i}\n"
-        eks_set_context "member-${i}"
-        kubectl get pod -l app=karmada-demo-nginx
-    done
+    echo_orange "\t${uni_circle_quarter} check from parent cluster the deployment across the two member clusters\n"
+    kubectl karmada --kubeconfig "${KARMADA_HOME}/karmada-apiserver.config" get pods
 }
 
 function eks_karmada_summary () {
