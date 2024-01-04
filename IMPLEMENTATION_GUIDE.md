@@ -47,7 +47,7 @@ For the purspose of this guide you need to have already in place the following p
 
 ### Preparation
 
-You can use any linux host that is properly configured to access you AWS environment. The most straight forward way it to use [AWS CloudShell](https://docs.aws.amazon.com/cloudshell/latest/userguide/welcome.html) directly from the [AWS Management Console](https://aws.amazon.com/console/) which requires minimum configuration. However CloudShell is designed for focused, task-based activities. If you want to perform terminal-based tasks using an AWS service with more flexible timeouts, we recommend using our cloud-based IDE, [AWS Cloud9](https://docs.aws.amazon.com/cloud9), or launching and [connecting to an Amazon EC2 instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AccessingInstances.html).
+You can use any linux host that is properly configured to access you AWS environment. The most straight forward way is to use [AWS CloudShell](https://docs.aws.amazon.com/cloudshell/latest/userguide/welcome.html) directly from the [AWS Management Console](https://aws.amazon.com/console/) which requires minimum configuration. However CloudShell is designed for focused, task-based activities. If you want to perform terminal-based tasks using an AWS service with more flexible timeouts, we recommend using our cloud-based IDE, [AWS Cloud9](https://docs.aws.amazon.com/cloud9), or launching and [connecting to an Amazon EC2 instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AccessingInstances.html).
 
 1. Install and configure the AWS CLI version 2.
 
@@ -346,7 +346,7 @@ kubectl apply -f loadbalancer.yaml
 KARMADA_LB=$(kubectl get svc -n karmada-system karmada-service-loadbalancer -o=jsonpath='{.status.loadBalancer.ingress[0].hostname}')
 ```
 
-6. Initialize karmada using the one of the public IP addresses of the load balancer as the advertised karmada API server endpoint. You should also add the wildcard domain name for AWS load balancers to the API server certificate.
+6. Initialize karmada using one of the public IP addresses of the load balancer as the advertised karmada API server endpoint. You should also add the wildcard domain name for AWS load balancers to the API server certificate.
 
 ```bash
  kubectl karmada init \
@@ -403,7 +403,7 @@ At the moment Karmada has a [limitation](https://github.com/karmada-io/karmada/b
 
 It is recommended to use the friendly name of the EKS cluster and use **only** small Latin characters and numbers (no spaces, no capital letters, no symbols etc). More specifically, the name must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character (e.g. 'my-name', or '123-abc', regex used for validation is '[a-z0-9]([-a-z0-9]*[a-z0-9])?'
 
-Login to the management host for your member cluster, or change to the appropriate context so that kubectl communicates with the required member cluster. Edit directly the ~/.kube/config file to change the cluster name for the desired member cluster. Ensure that you have a **backup** of the file before edit. Locate the cluster and context sections and alter the cluster named accordingly. In the following example you can see a full snippet of a config file for the cluster with name *myclustername.<region>.eksctl.io*
+Login to the management host for your member cluster, or change to the appropriate context so that kubectl communicates with the required member cluster. Edit directly the ~/.kube/config file to change the cluster name for the desired member cluster. Ensure that you have a **backup** of the file before editting it. Locate the cluster and context sections and alter the cluster named accordingly. In the following example you can see a full snippet of a config file for the cluster with name *myclustername.<region>.eksctl.io*
 
 ```yaml
 apiVersion: v1
@@ -511,7 +511,7 @@ At this point you have joined the cluster to Karmada and you are able to access 
 
 Karmada enables many advanced capabilities such as [multi-cluster scheduling](https://karmada.io/docs/userguide/scheduling/resource-propagating), [multi-cluster failover](https://karmada.io/docs/userguide/failover/failover-overview) or [autoscaling across different cluster](https://karmada.io/docs/userguide/autoscaling/federatedhpa).
 
-As an example at this point, assume you have three clusters registered with Karmada. Two in in eu-central-1 region and one in us-east-1. You can deploy a simple nginx application that will span across all three clusters. You also want to equally spread the capacity across cluster in Europe and North America. Since you have two clusters in eu-central-1 region, you want each to have 25% of the pods, thus you give a weight 1. For the us-east-1 region you want to have 50% of pods in the only cluster available, thus you give a weight 2.
+As an example at this point, assume you have three clusters registered with Karmada. Two in the eu-central-1 region and one in the us-east-1 region. You can deploy a simple nginx application that will span across all three clusters. You also want to equally spread the capacity across cluster in Europe and North America. Since you have two clusters in eu-central-1 region, you want each to have 25% of the pods, thus you give a weight 1. For the us-east-1 region you want to have 50% of pods in the only cluster available, thus you give a weight 2.
 
 4. Create a propagation policy that will give the required weights to different clusters.
 
