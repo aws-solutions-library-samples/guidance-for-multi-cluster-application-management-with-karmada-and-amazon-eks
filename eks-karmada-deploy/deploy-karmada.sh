@@ -5,7 +5,7 @@
 # shellcheck disable=SC2015,2181
 
 # Define default values for required parameters. These can be overriden with command line parameters
-EKS_VERSION="$(aws eks describe-addon-versions | jq -r ".addons[] | .addonVersions[] | .compatibilities[] | .clusterVersion" | sort | uniq | tail -1)"  
+EKS_VERSION="latest"
 VPC_NAME="vpc-eks"
 REGION="eu-north-1"
 CLUSTERS_NAME="karmada"
@@ -445,7 +445,7 @@ function eks_karmada_demo_deploy () {
 function eks_karmada_summary () {
     # function that summarises the karmada cluster deployment
     echo -e "\n\n"
-    echo_green "${uni_right_triangle}${uni_right_triangle}${uni_right_triangle} Karmada deployment is complete!\n"
+    echo_green "${uni_right_triangle}${uni_right_triangle}${uni_right_triangle} Karmada deployment is complete\n"
     echo_orange "\t${uni_right_triangle} Karmada settings directory: ${KARMADA_HOME}\n\n"
     echo_orange "\t${uni_right_triangle} To get info for your cluster status run:\n"
     echo_orange "\t  kubectl --kubeconfig ${KARMADA_HOME}/karmada-apiserver.config get clusters\n\n"
@@ -526,6 +526,11 @@ install_eksctl
 install_awscli
 
 echo_green "${uni_right_triangle} Prepare some parameters\n"
+# If not user-defined EKS version, retreive and use the latest available
+if [[ "${EKS_VERSION}" == "latest "]]; then
+    EKS_VERSION="$(aws eks describe-addon-versions | jq -r ".addons[] | .addonVersions[] | .compatibilities[] | .clusterVersion" | sort | uniq | tail -1)"  
+fi
+
 VPCID="$(aws ec2 describe-vpcs --region "${REGION}" --filter "Name=tag:Name,Values=*${VPC_NAME}*" --query "Vpcs[].VpcId" --output text)"
 [[ -z "${VPCID}" ]] && { echo_red "\t${uni_x} VPC ${VPC_NAME} not found, exiting\n"; exit 5; }
 echo_orange "\t${uni_check} VPC ID: ${VPCID}\n"
