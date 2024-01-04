@@ -511,7 +511,7 @@ At this point you have joined the cluster to Karmada and you are able to access 
 
 Karmada enables many advanced capabilities such as [multi-cluster scheduling](https://karmada.io/docs/userguide/scheduling/resource-propagating), [multi-cluster failover](https://karmada.io/docs/userguide/failover/failover-overview) or [autoscaling across different cluster](https://karmada.io/docs/userguide/autoscaling/federatedhpa).
 
-As an example at this point, assume you have three clusters registered with Karmada. Two in in eu-central-1 region and one in us-east-1. You can deploy a simple nginx application that will span across all three clusters. You also want to equally spread the capacity across cluster in Europe and North America. Since you have two clusters in eu-central-1 region, you want each to have 25% of the pods, thus you give a weight 1. For the us-east-1 region you want to have 50% of pods in the only cluster available, thus you give a weight 2.
+As an example at this point, assume you have three clusters registered with Karmada. Two in the eu-central-1 region and one in the us-east-1 region. You can deploy a simple nginx application that will span across all three clusters. You also want to equally spread the capacity across cluster in Europe and North America. Since you have two clusters in eu-central-1 region, you want each to have 25% of the pods, thus you give a weight 1. For the us-east-1 region you want to have 50% of pods in the only cluster available, thus you give a weight 2.
 
 4. Create a propagation policy that will give the required weights to different clusters.
 
