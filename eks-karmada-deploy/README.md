@@ -30,15 +30,24 @@ To run the script you need the following in place:
 
 ## Arguments
 
-**-e** - EKS cluster version (default: 1.28)
+**-e** - EKS cluster version (default: 1.28) 
+
 **-v** - VPC name (default: vpc-eks)  
+
 **-r** - AWS region (default: eu-north-1)
+
 **-c** - Cluster name prefix (default: karmada)
+
 **-n** - Number of cluster nodes (default: 3)
+
 **-p** - Node VCPUs (default: 2)
+
 **-m** - Node memory in GB (default: 4)  
+
 **-a** - Node architecture (default: x86_64)
+
 **-s** - Number of member clusters (default: 2)
+
 **-k** - Karmada HOME directory (default: ~/.karmada)
 
 **-u** - Run the script unattended
