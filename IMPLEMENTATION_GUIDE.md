@@ -47,7 +47,7 @@ For the purspose of this guide you need to have already in place the following p
 
 ### Preparation
 
-You can use any linux host that is properly configured to access you AWS environment. The most straight forward way it to use [AWS CloudShell](https://docs.aws.amazon.com/cloudshell/latest/userguide/welcome.html) directly from the [AWS Management Console](https://aws.amazon.com/console/) which requires minimum configuration. However CloudShell is designed for focused, task-based activities. If you want to perform terminal-based tasks using an AWS service with more flexible timeouts, we recommend using our cloud-based IDE, [AWS Cloud9](https://docs.aws.amazon.com/cloud9), or launching and [connecting to an Amazon EC2 instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AccessingInstances.html).
+You can use any linux host that is properly configured to access you AWS environment. The most straight forward way is to use [AWS CloudShell](https://docs.aws.amazon.com/cloudshell/latest/userguide/welcome.html) directly from the [AWS Management Console](https://aws.amazon.com/console/) which requires minimum configuration. However CloudShell is designed for focused, task-based activities. If you want to perform terminal-based tasks using an AWS service with more flexible timeouts, we recommend using our cloud-based IDE, [AWS Cloud9](https://docs.aws.amazon.com/cloud9), or launching and [connecting to an Amazon EC2 instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AccessingInstances.html).
 
 1. Install and configure the AWS CLI version 2.
 
