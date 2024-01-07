@@ -17,6 +17,17 @@ MEMBER_CLUSTER_NUM=2
 KARMADA_HOME="${HOME}/.karmada"
 CLUSTER_NAMES="" # to be used only for cleanup operations
 
+# We need nice colors for terminals that support it
+function echo_red () { echo -ne "\033[0;31m${1}\033[0m"; }
+function echo_orange () { echo -ne "\033[0;33m${1}\033[0m"; }
+function echo_green () { echo -ne "\033[0;32m${1}\033[0m"; }
+
+# We also like nice unicode characters
+uni_right_triangle="\u25B7"
+uni_circle_quarter="\u25D4"
+uni_check="\u2714"
+uni_x="\u2718"
+
 # Let's parse any command line parameters
 while getopts ":e:v:r:c:n:p:m:a:s:k:dhzu" opt; do
   case $opt in
@@ -24,7 +35,8 @@ while getopts ":e:v:r:c:n:p:m:a:s:k:dhzu" opt; do
     v) VPC_NAME="${OPTARG}";;
     r) REGION="${OPTARG}";;
     c) CLUSTERS_NAME="${OPTARG}";;
-    n) CLUSTER_NODES_NUM="${OPTARG}";;
+    n) CLUSTER_NODES_NUM="${OPTARG}"; 
+        [[ ${CLUSTER_NODES_NUM} -lt 3 ]] && { echo_red "This script deploys Karmada in high availability mode and you need at least 3 nodes for your cluster.\nPlease adjuct the parameter -n to 3 or more\n"; exit 1;} ;;
     p) CLUSTER_VCPUS="${OPTARG}";;
     m) CLUSTER_MEMORY="${OPTARG}";;
     a) CLUSTER_CPU_ARCH="${OPTARG}";;
@@ -41,7 +53,7 @@ while getopts ":e:v:r:c:n:p:m:a:s:k:dhzu" opt; do
         echo "  -v VPC name                       (default: vpc-manual)"
         echo "  -r Region                         (default: eu-north-1)"
         echo "  -c Cluster name                   (default: karmada)"
-        echo "  -n Number of cluster nodes        (default: 3)"
+        echo "  -n Number of cluster nodes        (default: 3) - You need at least 3 nodes for Karmada high availability"
         echo "  -p Cluster VCPUs                  (default: 2)"
         echo "  -m Cluster memory                 (default: 4)"
         echo "  -a Cluster CPU architecture       (default: x86_64)"
@@ -60,18 +72,6 @@ while getopts ":e:v:r:c:n:p:m:a:s:k:dhzu" opt; do
     *) echo "Invalid option: -${OPTARG}. Use -h for more information"; exit 1;;
   esac
 done
-
-# We need nice colors for terminals that support it
-function echo_red () { echo -ne "\033[0;31m${1}\033[0m"; }
-function echo_orange () { echo -ne "\033[0;33m${1}\033[0m"; }
-function echo_green () { echo -ne "\033[0;32m${1}\033[0m"; }
-
-# We also like nice unicode characters
-uni_right_triangle="\u25B7"
-uni_circle_quarter="\u25D4"
-uni_check="\u2714"
-uni_x="\u2718"
-
 
 function cleanup () {
     # function to clean up after exit
