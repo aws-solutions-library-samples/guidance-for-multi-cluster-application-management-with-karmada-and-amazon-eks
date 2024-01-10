@@ -218,7 +218,7 @@ function eks_create_cluster () {
     # Check if the cluster already exists
     echo_orange "\t${uni_circle_quarter} check if cluster ${CLUSTERS_NAME}-${1} exists"
 
-    [[ $(aws eks list-clusters --output text | grep -c "${CLUSTERS_NAME}-${1}") -ge 1 ]] && { echo_green " ${uni_check}\n"; return 1; } || echo_red " ${uni_x}\n"
+    [[ $(aws eks list-clusters --region "${REGION}" --output text | grep -c "${CLUSTERS_NAME}-${1}") -ge 1 ]] && { echo_green " ${uni_check}\n"; return 1; } || echo_red " ${uni_x}\n"
 
     # If the cluster does not exist, create it
     echo_orange "\t${uni_circle_quarter} deploy cluster ${CLUSTERS_NAME}-${1} (this will take several minutes)\n"
