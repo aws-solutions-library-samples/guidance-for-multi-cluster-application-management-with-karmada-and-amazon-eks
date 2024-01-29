@@ -22,13 +22,17 @@ function cleanup () {
 function solution_usage_code () {
     # Function that deploys a simple cloudformation stack to create an SSM Parameter for recording purposes of solution usage
     # The use o SSM parameter does not add any security risk and is at no cost
-    local template_body='{ "AWSTemplateFormatVersion" : "2010-09-09", "Description" : "Multi-cluster Solutions Guidance Tracking", 
-                           "Resources" : { "NoopParam": { "Type": "AWS::SSM::Parameter", "Properties": { 
-                           "Name": "multi-cluster-management-solution-guidance", "Type": "String", "Value": "NoValue" } } } }'
+    { echo '{ "AWSTemplateFormatVersion" : "2010-09-09",'
+      echo '"Description" : "Multi-cluster Solutions Guidance Tracking",'
+      echo '"Resources" : {'
+      echo '    "NoopParam": { "Type": "AWS::SSM::Parameter",'
+      echo '                   "Properties": { "Name": "multi-cluster-management-solution-guidance",'
+      echo '                                   "Type": "String", "Value": "NoValue" } } } }'
+    } > /tmp/$$.karmada-cf.json
 
     echo_orange "\t${uni_circle_quarter} Deploy dummy cloudformation for solution metadata code recording"
-    aws cloudformation deploy --region "${REGION}" --template-body ${template_body} --stack-name multi-cluster-management-solution-guidance
-    [[ $? -eq 0 ]] && echo_green "\t${uni_check}\n" || { echo_orange " ${uni_x}\n"; exit 5; }
+    aws cloudformation deploy --region "${REGION}" --template-file /tmp/$$.karmada-cf.json --stack-name multi-cluster-management-solution-guidance
+    [[ $? -eq 0 ]] && { echo_green "\t${uni_check}\n"; rm -f /tmp/$$.karmada-cf.json; } || { echo_orange " ${uni_x}\n"; rm -f /tmp/$$.karmada-cf.json; exit 5; }
 }
 
 function running_on () {
