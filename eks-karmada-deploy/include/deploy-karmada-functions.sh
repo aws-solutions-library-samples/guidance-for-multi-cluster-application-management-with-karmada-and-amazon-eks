@@ -1,23 +1,34 @@
 #!/bin/bash
 # Author: Alexandros Soumplis (soumplis@amazon.com)
-# Description: Functions file for karmada deployment scripts
+# Description: Functions for the Karmada deployment scripts
 
-# shellcheck disable=SC2015,2181
-# We need nice colors for terminals that support it
-function echo_red () { echo -ne "\033[0;31m${1}\033[0m"; }
-function echo_orange () { echo -ne "\033[0;33m${1}\033[0m"; }
-function echo_green () { echo -ne "\033[0;32m${1}\033[0m"; }
-
-# We also like nice unicode characters
+# Nice unicode characters
 uni_right_triangle="\u25B7"
 uni_circle_quarter="\u25D4"
 uni_check="\u2714"
 uni_x="\u2718"
 
+# We need nice colors for terminals that support it
+function echo_red () { echo -ne "\033[0;31m${1}\033[0m"; }
+function echo_orange () { echo -ne "\033[0;33m${1}\033[0m"; }
+function echo_green () { echo -ne "\033[0;32m${1}\033[0m"; }
+
 function cleanup () {
     # function to clean up after exit
     # shellcheck disable=SC2317
     echo -e "\033[0m\n"
+}
+
+function solution_usage_code () {
+    # Function that deploys a simple cloudformation stack to create an SSM Parameter for recording purposes of solution usage
+    # The use o SSM parameter does not add any security risk and is at no cost
+    local template_body='{ "AWSTemplateFormatVersion" : "2010-09-09", "Description" : "Multi-cluster Solutions Guidance Tracking", 
+                           "Resources" : { "NoopParam": { "Type": "AWS::SSM::Parameter", "Properties": { 
+                           "Name": "multi-cluster-management-solution-guidance", "Type": "String", "Value": "NoValue" } } } }'
+
+    echo_orange "\t${uni_circle_quarter} Deploy dummy cloudformation for solution metadata code recording"
+    aws cloudformation deploy --region "${REGION}" --template-body ${template_body} --stack-name multi-cluster-management-solution-guidance
+    [[ $? -eq 0 ]] && echo_green "\t${uni_check}\n" || { echo_orange " ${uni_x}\n"; exit 5; }
 }
 
 function running_on () {
