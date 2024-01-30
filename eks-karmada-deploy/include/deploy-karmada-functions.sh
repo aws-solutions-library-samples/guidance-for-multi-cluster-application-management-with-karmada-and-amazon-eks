@@ -58,7 +58,6 @@ function resolve_ip () {
     fi
 }
 
-# Find the correct package manager for the OS
 function os_package_manager () {
     if [ "$RUNNINGON" == "Linux" ]; then
         # Check the OS package manager
@@ -79,7 +78,6 @@ function install_os_packages () {
     [[ $? -eq 0 ]] && echo_green " ${uni_check}\n" || { echo_red " ${uni_x}\n"; exit 5; }
 }
 
-# Install kubectl
 function install_kubectl () {
     command -v kubectl > /dev/null && { echo_orange "\t${uni_check} kubectl already installed\n"; return 0; }
 
@@ -91,11 +89,14 @@ function install_kubectl () {
     command -v kubectl > /dev/null && echo_green " ${uni_check}\n" || { echo_red " ${uni_x}\n"; exit 5; }
 }
 
-# Install eksctl
 function install_eksctl () {
-    command -v eksctl > /dev/null && { echo_orange "\t${uni_check} eksctl already installed\n"; return 0; }
+    command -v eksctl > /dev/null 
+    if [ $? -eq 0 ]; then
+        local latest_eksctl_version="$(curl -sL https://api.github.com/repos/eksctl-io/eksctl/releases | jq -r '.[0].tag_name')"
+        [[ "v$(eksctl version)" == "${latest_eksctl_version}" ]] && { echo_orange "\t${uni_check} eksctl already installed and the latest version \n"; return 0; }
+    fi
 
-    echo_orange "\n\t${uni_circle_quarter} eksctl could not be found, installing it now"
+    echo_orange "\n\t${uni_circle_quarter} eksctl could not be found or is not the latest version, installing/upgrading now"
     cd /tmp || { echo_red " ${uni_x}Cannot access /tmp directory\n"; exit 5; }
     curl -sLO "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_Linux_amd64.tar.gz"
     tar -xzf eksctl_Linux_amd64.tar.gz -C /tmp && rm eksctl_Linux_amd64.tar.gz
@@ -104,7 +105,6 @@ function install_eksctl () {
     command -v eksctl > /dev/null && echo_green " ${uni_check}\n" || { echo_red " ${uni_x}\n"; exit 5; }
 }
 
-# Install awscli v2
 function install_awscli () {
     AWSCLI_MAJOR_VERSION=$(aws --version 2>&1| cut -b9)
     [[ "${AWSCLI_MAJOR_VERSION}" == "2" ]] && { echo_orange "\t${uni_check} aws cli v2 already installed\n"; return 0; }
@@ -118,7 +118,6 @@ function install_awscli () {
     command -v aws > /dev/null && echo_green " ${uni_check}\n" || { echo_red " ${uni_x}\n"; exit 5; }
 }
 
-# get all subnets from the vpc and classify into public and private
 function get_subnets () {
     # function that gets the public and private subnets of the VPC
     # Initialize two local array variables to store the subnet IDs
@@ -170,23 +169,23 @@ function get_subnets () {
 function eks_create_cluster () {
     # function that deploys an Amazon EKS cluster with the eksctl utility
     # Check if the cluster already exists
-    echo_orange "\t${uni_circle_quarter} check if cluster ${CLUSTERS_NAME}-${1} exists"
+    echo_orange "\t${uni_circle_quarter} check if cluster ${1} exists"
 
-    [[ $(aws eks list-clusters --region "${REGION}" --output text | grep -c "${CLUSTERS_NAME}-${1}") -ge 1 ]] && { echo_green " ${uni_check}\n"; return 1; } || echo_red " ${uni_x}\n"
+    [[ $(aws eks list-clusters --region "${REGION}" --output text | grep -c "${1}") -ge 1 ]] && { echo_green " ${uni_check}\n"; return 1; } || echo_red " ${uni_x}\n"
 
     # If the cluster does not exist, create it
-    echo_orange "\t${uni_circle_quarter} deploy cluster ${CLUSTERS_NAME}-${1} (this will take several minutes)\n"
+    echo_orange "\t${uni_circle_quarter} deploy cluster ${1} (this will take several minutes)\n"
     eksctl create cluster \
         -v 2 --nodes "${CLUSTER_NODES_NUM}" --nodes-min "${CLUSTER_NODES_NUM}" --nodes-max "${CLUSTER_NODES_NUM}" --region "${REGION}" \
         --instance-prefix "${CLUSTERS_NAME}" --version "${EKS_VERSION}" \
         --vpc-private-subnets "${PRIVATE_SUBNETS}" --vpc-public-subnets "${PUBLIC_SUBNETS}" \
         --instance-selector-vcpus "${CLUSTER_VCPUS}" --instance-selector-memory "${CLUSTER_MEMORY}" --instance-selector-cpu-architecture "${CLUSTER_CPU_ARCH}" --auto-kubeconfig \
         --alb-ingress-access --asg-access \
-        --name "${CLUSTERS_NAME}-${1}"
+        --name "${1}"
     [[ $? -eq 0 ]] && echo_green "\t${uni_check} Cluster deployed successfully\n" || { echo_orange " ${uni_x}\n"; exit 5; }
     
-    echo_orange "\t${uni_circle_quarter} update kube config for ${CLUSTERS_NAME}-${1}"
-    aws eks update-kubeconfig --region "${REGION}" --name "${CLUSTERS_NAME}-${1}" > /dev/null
+    echo_orange "\t${uni_circle_quarter} update kube config for ${1}"
+    aws eks update-kubeconfig --region "${REGION}" --name "${1}" > /dev/null
     [[ $? -eq 0 ]] && echo_green " ${uni_check}\n" || { echo_orange " ${uni_x}\n"; exit 5; }
 }
 
@@ -195,7 +194,7 @@ function eks_set_context () {
     local desirable_context
     # Get the desirable context from the config file and use it
     echo_orange "\t${uni_circle_quarter} switching to the right context"
-    desirable_context=$(kubectl config view -o json | jq -r '.contexts[]?.name' | grep "${CLUSTERS_NAME}-${1}")
+    desirable_context=$(kubectl config view -o json | jq -r '.contexts[]?.name' | grep "${1}")
     kubectl config use-context "${desirable_context}" > /dev/null
     [[ $? -eq 0 ]] && echo_green " ${uni_check}\n" || { echo_orange " ${uni_x}\n"; exit 5; }
 }
@@ -208,23 +207,23 @@ function eks_deploy_ebs () {
     # Associate the IAM OIDC provider
     echo_orange "\t${uni_circle_quarter} associate the IAM OIDC provider"
     eksctl utils associate-iam-oidc-provider \
-        -v 0 --region "${REGION}" --cluster "${CLUSTERS_NAME}-${1}" --approve > /dev/null
+        -v 0 --region "${REGION}" --cluster "${1}" --approve > /dev/null
     [[ $? -eq 0 ]] && echo_green " ${uni_check}\n" || { echo_orange " ${uni_x}\n"; exit 5; }
 
     # Create the IAM service account with a region specific name
     echo_orange "\t${uni_circle_quarter} create IAM service account"
     eksctl create iamserviceaccount \
-        -v 0 --region "${REGION}" --cluster "${CLUSTERS_NAME}-${1}" \
+        -v 0 --region "${REGION}" --cluster "${1}" \
         --attach-policy-arn arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy \
         --name "ebs-csi-controller-sa" --namespace kube-system --approve --role-only \
-        --role-name "AmazonEKS_EBS_CSI_DriverRole_${REGION}"  > /dev/null
+        --role-name "AmazonEKS_EBS_CSI_DriverRole_${REGION}_${CLUSTERS_NAME}"  > /dev/null
     [[ $? -eq 0 ]] && echo_green " ${uni_check}\n" || { echo_red " ${uni_x}\n"; exit 5; }
 
     # Deploy the EBS CSI driver with a region specific name
     echo_orange "\t${uni_circle_quarter} deploy EBS addon"
     eksctl create addon \
-        -v 0 --region "${REGION}" --name aws-ebs-csi-driver --cluster "${CLUSTERS_NAME}-${1}" \
-        --service-account-role-arn "arn:aws:iam::${ACCOUNTID}:role/AmazonEKS_EBS_CSI_DriverRole_${REGION}" --force  > /dev/null
+        -v 0 --region "${REGION}" --name aws-ebs-csi-driver --cluster "${1}" \
+        --service-account-role-arn "arn:aws:iam::${ACCOUNTID}:role/AmazonEKS_EBS_CSI_DriverRole_${REGION}_${CLUSTERS_NAME}" --force  > /dev/null
     [[ $? -eq 0 ]] && echo_green " ${uni_check}\n" || { echo_red " ${uni_x}\n"; exit 5; }
 
     # Create the gp3 storage class
@@ -356,24 +355,24 @@ function eks_karmada_register () {
     # Ensure we have the karmada plugin installed
     eks_karmada_plugin_install
 
-    # Check if the cluster is already registered
-    eks_set_context parent
-    echo_orange "\t${uni_circle_quarter} check if ${CLUSTERS_NAME}-${1} is already registered to Karmada cluster"
-    [[ $(kubectl --kubeconfig "${KARMADA_HOME}/karmada-apiserver.config" get clusters | grep -c "${CLUSTERS_NAME}-${1}") -ge 1 ]] && { echo_green " ${uni_check}\n"; return 0; } || { echo_red " ${uni_x}\n"; }
+    # Check if the cluster is already registered on the parent cluster
+    eks_set_context "${2}"
+    echo_orange "\t${uni_circle_quarter} check if ${1} is already registered to Karmada cluster"
+    [[ $(kubectl --kubeconfig "${KARMADA_HOME}/karmada-apiserver.config" get clusters | grep -c "${1}") -ge 1 ]] && { echo_green " ${uni_check}\n"; return 0; } || { echo_red " ${uni_x}\n"; }
 
     # Ensure we are working in the right context
     eks_set_context "${1}"
 
     kubectl karmada join \
-    --kubeconfig "${KARMADA_HOME}/karmada-apiserver.config" "${CLUSTERS_NAME}-${1}"
+    --kubeconfig "${KARMADA_HOME}/karmada-apiserver.config" "${1}"
     [[ $? -eq 0 ]] && { echo_green " ${uni_check}\n"; } || { echo_red " ${uni_x}\n"; exit 5; }
 }
 
 function eks_karmada_demo_deploy () {
     # function to demo multi-cluster scheduling with Karmada
     # for the demo purpose we will use only 2 member clusters
-    echo_green "${uni_right_triangle} Deploying demo application (nginx) to member clusters ${CLUSTERS_NAME}-member-1 and ${CLUSTERS_NAME}-member-2\n"
-    eks_set_context parent
+    echo_green "${uni_right_triangle} Deploying demo application (nginx) to member clusters ${1} and ${2}\n"
+    eks_set_context "${3}"
 
     echo_orange "\t${uni_circle_quarter} check if propagation policy exists"
     # shellcheck disable=SC2046
@@ -390,13 +389,13 @@ function eks_karmada_demo_deploy () {
             echo '      "resourceSelectors":[{ "apiVersion":"apps/v1", "kind":"Deployment", "name":"karmada-demo-nginx" }],'
             echo '      "placement":{'
             echo '         "clusterAffinity":{'
-            echo "            \"clusterNames\":[\"${CLUSTERS_NAME}-${1}\", \"${CLUSTERS_NAME}-${2}\"]},"
+            echo "            \"clusterNames\":[\"${1}\", \"${2}\"]},"
             echo '            "replicaScheduling":{'
             echo '               "replicaDivisionPreference":"Weighted",'
             echo '               "replicaSchedulingType":"Divided",'
             echo '               "weightPreference":{'
             echo '                  "staticWeightList":[{'
-            echo "                     \"targetCluster\":{ \"clusterNames\":[\"${CLUSTERS_NAME}-${1}\", \"${CLUSTERS_NAME}-${2}\"]},"
+            echo "                     \"targetCluster\":{ \"clusterNames\":[\"${1}\", \"${2}\"]},"
             echo '                     "weight":1}]'
             echo '                }'
             echo '            }'
@@ -451,4 +450,23 @@ function eks_karmada_delete () {
         [[ $? -eq 0 ]] && echo_green " ${uni_check}\n" || echo_red " ${uni_x}\n"
     fi
     exit 0
+}
+
+function delete_deployment () {
+    # get all clusters with name having prefix CLUSTERS_NAME
+    CLUSTER_NAMES=$(aws eks list-clusters --region "${REGION}" --output json | jq -r '.clusters[]' | grep "^${CLUSTERS_NAME}-" | xargs)
+    if [[ -z "${CLUSTER_NAMES}" ]]; then
+        echo_red "No EKS clusters found with the prefix ${CLUSTERS_NAME}\n"
+        echo_red "Exiting...\n"
+        exit 1
+    fi
+
+    echo_orange "This run will delete the following resources:\n"
+    echo_orange "  - EKS clusters: ${CLUSTER_NAMES}\n"
+    echo_orange "  - Karmada home directory ${KARMADA_HOME}\n"
+    echo ""
+    echo -n "To confirm type \"iReallyMeanIt\": "
+    read -r confirm
+    
+    [[ "${confirm}" == "iReallyMeanIt" ]] && eks_karmada_delete || { echo_red "You don't really mean it. Exiting...\n"; exit 1;}
 }
