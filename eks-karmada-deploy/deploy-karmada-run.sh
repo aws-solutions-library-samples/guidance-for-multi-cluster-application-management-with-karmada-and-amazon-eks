@@ -65,14 +65,16 @@ if [[ ${MEMBER_CLUSTER_NUM} -ge 1 ]]; then
     if [[ ${MEMBER_CLUSTER_NUM} -ge 2 ]]; then
         for i in $(seq 1 "${MEMBER_CLUSTER_NUM}"); do
             echo_green "${uni_right_triangle} Registering the Karmada member cluster ${CLUSTERS_NAME}-member-${i} to Karmada\n"
-            eks_karmada_register "${CLUSTERS_NAME}-member-${i}" "${CLUSTERS_NAME}-parent"
+                eks_karmada_register "${CLUSTERS_NAME}-member-${i}" "${CLUSTERS_NAME}-parent"
         done
 
-        [[ ${MEMBER_CLUSTER_NUM} -ge 2 ]] && eks_karmada_demo_deploy "${CLUSTERS_NAME}-member-1" "${CLUSTERS_NAME}-member-2" "${CLUSTERS_NAME}-parent"
-        echo_green "${uni_right_triangle} Switching to the Karmada parent cluster context\n"
-        eks_set_context "${CLUSTERS_NAME}-parent"
+        echo_green "${uni_right_triangle} Deploy demo workload with Karmada\n"
+            eks_karmada_demo_deploy "${CLUSTERS_NAME}-member-1" "${CLUSTERS_NAME}-member-2" "${CLUSTERS_NAME}-parent"
     fi
 fi
+
+echo_green "${uni_right_triangle} Switching to the Karmada parent cluster context\n"
+    eks_set_context "${CLUSTERS_NAME}-parent"
 
 echo_green "${uni_right_triangle} Installation is complete\n"
     eks_karmada_summary
