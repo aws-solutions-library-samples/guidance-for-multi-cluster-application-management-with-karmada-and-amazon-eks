@@ -16,7 +16,7 @@ KARMADA_HOME="${HOME}/.karmada"
 CLUSTER_NAMES="" # to be used only for cleanup operations
 
 # Let's parse any command line parameters
-while getopts ":e:v:r:c:n:p:m:a:s:k:dhzu" opt; do
+while getopts ":e:v:r:c:n:p:m:a:s:k:dhzuw" opt; do
   case $opt in
     e) EKS_VERSION="${OPTARG}";;
     v) VPC_NAME="${OPTARG}";;
@@ -31,6 +31,7 @@ while getopts ":e:v:r:c:n:p:m:a:s:k:dhzu" opt; do
     k) KARMADA_HOME="${OPTARG}/.karmada";;
     u) UNATTENDED="true";;
     z) SKIP_UTILS="true";;
+    w) MEMBER_CLUSTER_NUM=0;;
     d) DELETE="true";;
     h) 
         echo "Usage: $0 [args]"
@@ -48,6 +49,8 @@ while getopts ":e:v:r:c:n:p:m:a:s:k:dhzu" opt; do
         echo "  -k Karmada home directory         (default: ~ --- this results in your karmada config to be in ~/.karmada directory)"
         echo "  -u Unattended installation        (do not ask for confirmation, to allow unattended deployment)"
         echo ""
+        echo "  -w No member clusters and demo    (deploy only parent EKS cluster and Karmada control plane )"
+        echo ""
         echo "  -z Skip utilities installation    (ensure you have installed and configure the utilities: jq, awscli v2, eksctl, kubectl)"
         echo ""
         echo "  -d clean up the deployment        (delete EKS clusters with the prefix, cleanup karmada home dir)"
@@ -59,3 +62,17 @@ while getopts ":e:v:r:c:n:p:m:a:s:k:dhzu" opt; do
     *) echo "Invalid option: -${OPTARG}. Use -h for more information"; exit 1;;
   esac
 done
+
+echo "Ready to run the Karmada deployment script with the following parameters:"
+echo -n "  Amazon EKS version: "; echo_orange "${EKS_VERSION}\n"
+echo -n "  VPC name: "; echo_orange "${VPC_NAME}\n"
+echo -n "  Region: "; echo_orange "${REGION}\n"
+echo -n "  Cluster name prefix: "; echo_orange "${CLUSTERS_NAME}\n"
+echo -n "  Cluster nodes: "; echo_orange "${CLUSTER_NODES_NUM}\n"
+echo -n "  Cluster nodes CPUs: "; echo_orange "${CLUSTER_VCPUS}\n"
+echo -n "  Cluster nodes memory: "; echo_orange "${CLUSTER_MEMORY}\n"
+echo -n "  Cluster CPU arch: "; echo_orange "${CLUSTER_CPU_ARCH}\n"
+echo -n "  Number of karmada member clusters: "; echo_orange "${MEMBER_CLUSTER_NUM}\n"
+echo -n "  Karmada HOME dir: "; echo_orange "${KARMADA_HOME}\n\n"
+echo "Please note that depending on the number of clusters you are deploying,"
+echo "this script may take a while to complete (expect 20+ minutes per cluster)."
