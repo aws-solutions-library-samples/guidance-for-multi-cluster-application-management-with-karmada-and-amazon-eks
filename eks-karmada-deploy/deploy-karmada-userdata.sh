@@ -24,10 +24,6 @@ echo_green "${uni_right_triangle} Prepare some parameters\n"
     echo_orange "\t${uni_check} Private Subnets: ${PRIVATE_SUBNETS}\n"
     echo_orange "\t${uni_check} Public Subnets: ${PUBLIC_SUBNETS}\n"
 
-# Deploy the EBS addon to the parent Karmada cluster
-echo_green "${uni_right_triangle} Deploy the EBS addon for Karmada HA\n"
-    eks_deploy_ebs "${CLUSTERS_NAME}-parent"
-
 # Deploy a network load balancer for the Karmada API server
 echo_green "${uni_right_triangle} Deploy Karmada Load Balancer\n"
     eks_lb_deploy "${CLUSTERS_NAME}-parent"
