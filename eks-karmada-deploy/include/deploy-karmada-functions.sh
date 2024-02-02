@@ -26,12 +26,14 @@ function solution_usage_code () {
       echo '"Description" : "TR-1234 Multi-cluster Solutions Guidance Tracking",'
       echo '"Resources" : {'
       echo '    "NoopParam": { "Type": "AWS::SSM::Parameter",'
-      echo '                   "Properties": { "Name": "multi-cluster-management-solution-guidance",'
+      echo "                   \"Properties\": { \"Name\": \"multi-cluster-management-solution-guidance-${REGION}-${CLUSTERS_NAME}\","
       echo '                                   "Type": "String", "Value": "NoValue" } } } }'
     } > /tmp/$$.karmada-cf.json
 
     echo_orange "\t${uni_circle_quarter} Deploy dummy cloudformation for solution metadata code recording"
-    aws cloudformation deploy --region "${REGION}" --template-file /tmp/$$.karmada-cf.json --stack-name "multi-cluster-management-solution-guidance-${CLUSTERS_NAME}" > /dev/null
+    aws cloudformation deploy --no-fail-on-empty-changeset \
+    --region "${REGION}" --template-file /tmp/$$.karmada-cf.json \
+    --stack-name "multi-cluster-management-solution-guidance-${REGION}-${CLUSTERS_NAME}" > /dev/null
     [[ $? -eq 0 ]] && { echo_green "\t${uni_check}\n"; rm -f /tmp/$$.karmada-cf.json; } || { echo_orange " ${uni_x}\n"; rm -f /tmp/$$.karmada-cf.json; exit 5; }
 }
 
