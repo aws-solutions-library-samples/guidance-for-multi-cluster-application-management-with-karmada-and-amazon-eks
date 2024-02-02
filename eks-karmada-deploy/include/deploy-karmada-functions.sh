@@ -315,7 +315,7 @@ function eks_karmada_plugin_install () {
     # If it is not installed, proceed with the installation
     echo_orange "\n\t${uni_circle_quarter} kubectl-karmada could not be found, installing it now"
     cd /tmp || { echo_red " ${uni_x}Cannot access /tmp directory\n"; exit 5; }
-    curl -sL "https://raw.githubusercontent.com/karmada-io/karmada/master/hack/install-cli.sh" | sed 's/mv -i/mv/' | sed 's/< \/dev\/null//' | sudo bash -s kubectl-karmada
+    curl -sL "https://raw.githubusercontent.com/karmada-io/karmada/master/hack/install-cli.sh" | sed 's/mv -i/mv/' | sed 's/< \/dev\/tty//' | sudo bash -s kubectl-karmada
    
     # Check the plugin is deployed successfully
     command -v kubectl-karmada > /dev/null && echo_green " ${uni_check}\n" || { echo_red " ${uni_x}\n"; exit 5; }
