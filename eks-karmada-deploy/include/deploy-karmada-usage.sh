@@ -16,7 +16,7 @@ KARMADA_HOME="${HOME}/.karmada"
 CLUSTER_NAMES="" # to be used only for cleanup operations
 
 # Let's parse any command line parameters
-while getopts ":e:v:r:c:n:p:m:a:s:k:dhzuw" opt; do
+while getopts ":e:v:r:c:n:p:m:a:s:k:dhztuw" opt; do
   case $opt in
     e) EKS_VERSION="${OPTARG}";;
     v) VPC_NAME="${OPTARG}";;
@@ -31,6 +31,7 @@ while getopts ":e:v:r:c:n:p:m:a:s:k:dhzuw" opt; do
     k) KARMADA_HOME="${OPTARG}/.karmada";;
     u) UNATTENDED="true";;
     z) SKIP_UTILS="true";;
+    t) SKIP_USAGE="true";;
     w) MEMBER_CLUSTER_NUM=0;;
     d) DELETE="true";;
     h) 
@@ -52,6 +53,7 @@ while getopts ":e:v:r:c:n:p:m:a:s:k:dhzuw" opt; do
         echo "  -w No member clusters and demo    (deploy only parent EKS cluster and Karmada control plane )"
         echo ""
         echo "  -z Skip utilities installation    (ensure you have installed and configure the utilities: jq, awscli v2, eksctl, kubectl)"
+        echo "  -t Skip usage recording           (do not record usage data)"
         echo ""
         echo "  -d clean up the deployment        (delete EKS clusters with the prefix, cleanup karmada home dir)"
         echo ""
