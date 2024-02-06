@@ -236,7 +236,7 @@ function eks_deploy_ebs () {
 
     # Check the EBS CSI driver
     echo_orange "\t${uni_circle_quarter} Check EBS addon"
-    if [ $(eksctl get addon --name aws-ebs-csi-driver --cluster "${1}" --region "${REGION}" | grep -c AmazonEKS_EBS_CSI_DriverRole_${REGION}_${CLUSTERS_NAME}) -ge 1 ]; then
+    if [ $(eksctl get addon --name aws-ebs-csi-driver --cluster "${1}" --region "${REGION}" | grep -c ^aws-ebs-csi-driver) -ge 1 ]; then
         echo_green " ${uni_check}\n"
     else
         echo_red " ${uni_x}\n"
