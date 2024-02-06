@@ -98,7 +98,7 @@ function install_eksctl () {
         [[ "v$(eksctl version)" == "${latest_eksctl_version}" ]] && { echo_orange "\t${uni_check} eksctl already installed and the latest version \n"; return 0; }
     fi
 
-    echo_orange "\n\t${uni_circle_quarter} eksctl could not be found or is not the latest version, installing/upgrading now"
+    echo_orange "\t${uni_circle_quarter} eksctl could not be found or is not the latest version, installing/upgrading now"
     cd /tmp || { echo_red " ${uni_x}Cannot access /tmp directory\n"; exit 5; }
     curl -sLO "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_Linux_amd64.tar.gz"
     tar -xzf eksctl_Linux_amd64.tar.gz -C /tmp && rm eksctl_Linux_amd64.tar.gz
@@ -206,41 +206,61 @@ function eks_deploy_ebs () {
     # Ensure we are working in the right context
     eks_set_context "${1}"
 
-    # Associate the IAM OIDC provider
-    echo_orange "\t${uni_circle_quarter} associate the IAM OIDC provider"
-    eksctl utils associate-iam-oidc-provider \
-        -v 0 --region "${REGION}" --cluster "${1}" --approve > /dev/null
-    [[ $? -eq 0 ]] && echo_green " ${uni_check}\n" || { echo_orange " ${uni_x}\n"; exit 5; }
+    # Check and associate the IAM OIDC provider
+    echo_orange "\t${uni_circle_quarter} Check IAM OIDC provider"
+    if [ $(aws eks describe-cluster --region "${REGION}" --query "cluster.identity.oidc.issuer" --name "${1}" --output text | grep -c "${REGION}") -ge 1 ]; then
+        echo_green " ${uni_check}\n" 
+    else
+        echo_red " ${uni_x}\n"
+        echo_orange "\t${uni_circle_quarter} associate the IAM OIDC provider"
+        eksctl utils associate-iam-oidc-provider \
+            -v 0 --region "${REGION}" --cluster "${1}" --approve > /dev/null
+        [[ $? -eq 0 ]] && echo_green " ${uni_check}\n" || { echo_orange " ${uni_x}\n"; exit 5; }
+    fi
 
-    # Create the IAM service account with a region specific name
-    echo_orange "\t${uni_circle_quarter} create IAM service account"
-    eksctl create iamserviceaccount \
-        -v 0 --region "${REGION}" --cluster "${1}" \
-        --attach-policy-arn arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy \
-        --name "ebs-csi-controller-sa" --namespace kube-system --approve --role-only \
-        --role-name "AmazonEKS_EBS_CSI_DriverRole_${REGION}_${CLUSTERS_NAME}"  > /dev/null
-    [[ $? -eq 0 ]] && echo_green " ${uni_check}\n" || { echo_red " ${uni_x}\n"; exit 5; }
+    # Check the IAM service account
+    echo_orange "\t${uni_circle_quarter} Check IAM service account"
+    if [ $(eksctl get iamserviceaccount  --region "${REGION}" --cluster "${1}" ebs-csi-controller-sa | grep -c ^kube-system) -ge 1 ]; then
+        echo_green " ${uni_check}\n"
+    else
+        echo_red " ${uni_x}\n"
+        # Create the IAM service account with a region specific name
+        echo_orange "\t${uni_circle_quarter} create IAM service account"
+        eksctl create iamserviceaccount \
+            -v 0 --region "${REGION}" --cluster "${1}" \
+            --attach-policy-arn arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy \
+            --name "ebs-csi-controller-sa" --namespace kube-system --approve --role-only \
+            --role-name "AmazonEKS_EBS_CSI_DriverRole_${REGION}_${CLUSTERS_NAME}"  > /dev/null
+        [[ $? -eq 0 ]] && echo_green " ${uni_check}\n" || { echo_red " ${uni_x}\n"; exit 5; }
+    fi
 
-    # Deploy the EBS CSI driver with a region specific name
-    echo_orange "\t${uni_circle_quarter} deploy EBS addon"
-    eksctl create addon \
-        -v 0 --region "${REGION}" --name aws-ebs-csi-driver --cluster "${1}" \
-        --service-account-role-arn "arn:aws:iam::${ACCOUNTID}:role/AmazonEKS_EBS_CSI_DriverRole_${REGION}_${CLUSTERS_NAME}" --force  > /dev/null
-    [[ $? -eq 0 ]] && echo_green " ${uni_check}\n" || { echo_red " ${uni_x}\n"; exit 5; }
+    # Check the EBS CSI driver
+    echo_orange "\t${uni_circle_quarter} Check EBS addon"
+    if [ $(eksctl get addon --name aws-ebs-csi-driver --cluster "${1}" --region "${REGION}" | grep -c AmazonEKS_EBS_CSI_DriverRole_${REGION}_${CLUSTERS_NAME}) -ge 1 ]; then
+        echo_green " ${uni_check}\n"
+    else
+        echo_red " ${uni_x}\n"
+        # Deploy the EBS CSI driver with a region specific name
+        echo_orange "\t${uni_circle_quarter} deploy EBS addon"
+        eksctl create addon \
+            -v 0 --region "${REGION}" --name aws-ebs-csi-driver --cluster "${1}" \
+            --service-account-role-arn "arn:aws:iam::${ACCOUNTID}:role/AmazonEKS_EBS_CSI_DriverRole_${REGION}_${CLUSTERS_NAME}" --force  > /dev/null
+        [[ $? -eq 0 ]] && echo_green " ${uni_check}\n" || { echo_red " ${uni_x}\n"; exit 5; }
 
-    # Create the gp3 storage class
-    echo_orange "\t${uni_circle_quarter} create gp3 ebs storage class"
-    {   echo '{ "apiVersion": "storage.k8s.io/v1",'
-        echo '  "kind": "StorageClass",'
-        echo '  "metadata": { "name": "ebs-sc" },'
-        echo '  "provisioner": "ebs.csi.aws.com",'
-        echo '  "volumeBindingMode": "WaitForFirstConsumer",'
-        echo '  "parameters": { "type": "gp3" }'
-        echo '}'
-     } > /tmp/$$.ebs-sc.json
+        # Create the gp3 storage class
+        echo_orange "\t${uni_circle_quarter} create gp3 ebs storage class"
+        {   echo '{ "apiVersion": "storage.k8s.io/v1",'
+            echo '  "kind": "StorageClass",'
+            echo '  "metadata": { "name": "ebs-sc" },'
+            echo '  "provisioner": "ebs.csi.aws.com",'
+            echo '  "volumeBindingMode": "WaitForFirstConsumer",'
+            echo '  "parameters": { "type": "gp3" }'
+            echo '}'
+        } > /tmp/$$.ebs-sc.json
 
-    kubectl apply -f /tmp/$$.ebs-sc.json > /dev/null
-    [[ $? -eq 0 ]] && { echo_green " ${uni_check}\n"; rm -f /tmp/$$.ebs-sc.json; } || { echo_red " ${uni_x}\n"; rm -f /tmp/$$.ebs-sc.json; exit 5; }
+        kubectl apply -f /tmp/$$.ebs-sc.json > /dev/null
+        [[ $? -eq 0 ]] && { echo_green " ${uni_check}\n"; rm -f /tmp/$$.ebs-sc.json; } || { echo_red " ${uni_x}\n"; rm -f /tmp/$$.ebs-sc.json; exit 5; }
+    fi
 }
 
 function eks_karmada_ns () {
