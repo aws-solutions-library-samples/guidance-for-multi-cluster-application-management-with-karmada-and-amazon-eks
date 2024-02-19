@@ -1,0 +1,10 @@
+#!/bin/bash -x
+yum update -y
+yum install -y git
+
+su -c "aws eks update-kubeconfig --region REGION --name karmada-eks-cluster-parent" ec2-user
+
+cd /home/ec2-user
+su -c "git clone https://github.com/aws-solutions-library-samples/guidance-for-multi-cluster-management-eks-karmada.git" ec2-user
+cd guidance-for-multi-cluster-management-eks-karmada/eks-karmada-deploy
+su -c "bash -x /home/ec2-user/guidance-for-multi-cluster-management-eks-karmada/eks-karmada-deploy/deploy-karmada-run.sh -r REGION -v karmada-vpc -c karmada-eks-cluster -k /home/ec2-user -u -t" ec2-user

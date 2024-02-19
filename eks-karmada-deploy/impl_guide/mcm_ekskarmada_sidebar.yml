@@ -1,0 +1,35 @@
+entries:
+- title: Guidance for Multi cluster management with Amazon EKS and Karmada
+  folders:
+    - title: Get started
+      url: '#'
+      output: web 
+
+    - title: Overview
+      url: '#overview'
+      output: web 
+
+    - title: Architecture Overview
+      url: '#architecture-overview'
+      output: web
+
+    - title: Plan your deployment
+      url: '#plan-your-deployment'
+      output: web
+
+    - title: Security
+      url: '#security'
+      output: web
+
+    - title: Deploy the Guidance
+      url: '#deploy-the-guidance'
+      output: web
+
+    - title: Uninstall the Guidance
+      url: '#uninstall-the-guidance'
+      output: web
+
+    - title: Notices
+      url: '#notices'
+      output: web
+

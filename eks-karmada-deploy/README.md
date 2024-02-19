@@ -16,7 +16,7 @@ The main tasks of the script are the following:
 - Initialize Karmada on the control plane EKS cluster (parent)
 - Perform a simple demo deployment of a kubernetes workload across two member clusters with 50%-50% distribution
 
-## Pre-requisites
+## Prerequisites
 
 To run the script you need the following in place:  
 
@@ -66,13 +66,21 @@ To run the script you need the following in place:
 
 This will create a karmada control plane cluster and 3 member clusters with 2 compute nodes per cluster. The clusters' name prefix is "mykarmada" and all will be deployed in us-east-1 region.
 
+## Management host deployment
+
+This script creates configuration files and state file (ex. Karmada API server certificates), so it is strongly recommended to run it from a stateful host with appropriate backup and access. We recommend deploying an EC2 instance in your VPC and assign an Instance Profile with Administrator Access so as to be able to deploy EKS clusters and other services. After the EC2 instance is ready, proceed with the deployment commands below.
+
 ## Cloudshell deployment
 
 This script can be run directly from the [AWS Management Console](https://aws.amazon.com/console/) using the [AWS CloudShell](https://docs.aws.amazon.com/cloudshell/latest/userguide/welcome.html) for you convinience.
 
-**WARNING** CloudShell is designed for focused, task-based activities and your shell session automatically ends after approximately 20–30 minutes if you don't interact with AWS CloudShell using your keyboard or pointer. Running processes don't count as interactions, so while running this script make sure that you interact with the shell (ex. press Enter key) every 15 minutes to avoid timeouts and interrupting the script run. If you want to perform terminal-based tasks using an AWS service with more flexible timeouts, we recommend using our cloud-based IDE, [AWS Cloud9](https://docs.aws.amazon.com/cloud9), or launching and [connecting to an Amazon EC2 instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AccessingInstances.html).
+**WARNING** CloudShell is designed for focused, task-based activities. It is **not** meant for tasks that need to keep state and persistent data (ex. installation of system packages). Also, your shell session automatically ends after approximately 20–30 minutes if you don't interact with AWS CloudShell using your keyboard or pointer. Running processes don't count as interactions, so while running this script make sure that you interact with the shell (ex. press Enter key) every 15 minutes to avoid timeouts and interrupting the script run. and its use in this solutions is only recommended as a means for quick testing and you should **never** rely on it for production use.
 
-Assuming you are logged in to the AWS Management Console using a user with adequate permissions, open a CloudShell and do the following:
+The use of AWS CloudShell for this solutions is only recommended as a means for quick testing. If you want to perform a production grade deployment using an AWS service with more flexible timeouts and data persistency, we recommend using our cloud-based IDE, [AWS Cloud9](https://docs.aws.amazon.com/cloud9), or launching and [connecting to an Amazon EC2 instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AccessingInstances.html).
+
+Assuming you are logged in to the AWS Management Console using a user with adequate permissions, open a CloudShell run the deployment commands below.
+
+## Deployment commands
 
 1. Clone from Github this [solution repository](https://github.com/aws-solutions-library-samples/guidance-for-multi-cluster-management-eks-karmada)
 
@@ -98,7 +106,7 @@ chmod +x deploy_karmada.sh
 ./deploy-karmada.sh -r eu-central-1 -c mykarmada -n 2 -s 3
 ```
 
-1. Wait for the script to run. As long as you do not have any EKS clusters already deployed, expect roughly 1 hour in total for the script to complete.
+1. Wait for the script to run. As long as you do not have any EKS clusters already deployed, expect roughly 30-60 minutes (depending on number of clusters) in total for the script to complete.
 
 ## No Idempotency
 
@@ -188,7 +196,7 @@ karmada-demo-nginx-f68bf9f77-zt6bl   1/1     Running   0          108m
           by visiting the official Karmada documentation at https://karmada.io/docs/userguide/ 
 ```
 
-## Clean up
+## Uninstall
 
 The script has the *-d* parameter to perform a basic clean up of the environment. The script deletes the deployed EKS clusters with the prefix name you define and deletes the configuration directory of karmada. Be *VERY CAREFULL** using this automatic cleanup function and make sure you pass the correct parameters so as not to delete the wrong EKS clusters in your environment. Since there is no safe way to do a complete cleanup, please check and delete manually if necessary the following resources, deployed by the script:
 
