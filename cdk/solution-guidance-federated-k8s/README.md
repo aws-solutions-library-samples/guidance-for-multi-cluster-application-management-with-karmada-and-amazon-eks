@@ -11,7 +11,9 @@ To use this solutions deployment with the AWS CDK you need to have in place the 
 - An active [AWS Account](https://docs.aws.amazon.com/accounts/latest/reference/welcome-first-time-user.html){:target="_blank"} to deploy the main Amazon EKS cluster
 - A [user with administrator access](https://docs.aws.amazon.com/streams/latest/dev/setting-up.html){:target="_blank"} and an [Access key/Secret access key](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html){:target="_blank"} to configure [AWS Command Line Interface(AWS CLI)](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html){:target="_blank"} 
 
-## Deploy with AWS CloudShell
+## Deployment
+
+### Deploy with AWS CloudShell
 
 Unless you already have your development environment setup you can use [AWS CloudShell](https://aws.amazon.com/cloudshell/) to quickly deploy the solution. CloudShell is available from the AWS Management Console by clicking the shell icon in the top navigation bar. This will open a CloudShell environment in the current region with access to AWS Services. 
 
@@ -19,6 +21,15 @@ Unless you already have your development environment setup you can use [AWS Clou
 
 The use of AWS CloudShell for this solutions is only recommended as a means for quick testing. If you want to perform a production grade deployment using an AWS service with more flexible timeouts and data persistency, we recommend using our cloud-based IDE, [AWS Cloud9](https://docs.aws.amazon.com/cloud9), or launching and [connecting to an Amazon EC2 instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AccessingInstances.html).
 
+Assuming you are logged in to the AWS Management Console using a user with adequate permissions, open a CloudShell follow the "Deployment commands" below.
+
+### Deploy with AWS Cloud9
+
+Another option to have a stable and stateful deployment with minimum administration overhead and reduced cost, is to use [AWS Cloud9](https://aws.amazon.com/cloud9/). Follow the official documentation for [Creating an EC2 Environment](https://docs.aws.amazon.com/cloud9/latest/user-guide/create-environment-main.html) to create a new Cloud9 environment in the same VPC as the one you are going to use for Karmada deployment. Due to the nature of the deployment you cannot use AWS Cloud9 temporary credentials, but instead you have two options. Either [Create and use an instance profile to manage temporary credentials](https://docs.aws.amazon.com/cloud9/latest/user-guide/credentials.html#credentials-temporary) or [Create and store permanent access credentials in an Environment](https://docs.aws.amazon.com/cloud9/latest/user-guide/credentials.html#credentials-permanent-create).
+
+As long as you setup the credentials start a new terminal session (on the menu bar, choose Window, New Terminal) and follow the "Deployment commands" below.
+
+### Deployment commands
 
 1. Install Node.js 
 
@@ -30,7 +41,7 @@ First you need to install Node.js in the CloudShell instance. You can do this wi
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 ```
 
-1. Install AWS CDK
+2. Install AWS CDK
 
 Next, install the aws-cdk package using Node.js package manager
 
@@ -38,7 +49,7 @@ Next, install the aws-cdk package using Node.js package manager
 sudo npm install -g aws-cdk
 ```
 
-1. Install Amazon Corretto
+3. Install Amazon Corretto
 
 Install the latest version of [Amazon Corretto](https://docs.aws.amazon.com/corretto/latest/corretto-21-ug/amazon-linux-install.html) for Amazon Linux.
 
@@ -46,7 +57,7 @@ Install the latest version of [Amazon Corretto](https://docs.aws.amazon.com/corr
 sudo yum install -y java-21-amazon-corretto-headless
 ```
 
-1. Install Apache Maven
+4. Install Apache Maven
 
 Download the latest version of [Apache Maven](https://maven.apache.org/download.cgi), extract it and temporarily change the path to include the Apache Maven bin directory
 
@@ -58,7 +69,7 @@ source ~/.bashrc
 command -v mvn
 ```
 
-1. Prepare for the deployment
+5. Prepare for the deployment
 
 Download the [code](https://github.com/aws-solutions-library-samples/guidance-for-multi-cluster-management-eks-karmada) from Github and then get into the CDK code directory and run the preparation step. If it is your first run you **need** to run the `cdk bootstrap` command. 
 
@@ -70,7 +81,7 @@ cdk bootstrap
 cdk synth
 ```
 
-1. Deploy the solution
+5. Deploy the solution
 
 Now you are ready to deploy the solution with all the components described in the section below. 
 
