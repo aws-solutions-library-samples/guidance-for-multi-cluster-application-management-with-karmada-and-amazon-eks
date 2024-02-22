@@ -203,12 +203,16 @@ function eks_set_context () {
 
 function eks_deploy_ebs () {
     # function that deploys the ebs addon and configures a new gp3 storage class
+    local oidc_id
+
     # Ensure we are working in the right context
     eks_set_context "${1}"
 
     # Check and associate the IAM OIDC provider
     echo_orange "\t${uni_circle_quarter} Check IAM OIDC provider"
-    if [ $(aws eks describe-cluster --region "${REGION}" --query "cluster.identity.oidc.issuer" --name "${1}" --output text | grep -c "${REGION}") -ge 1 ]; then
+    oidc_id=$(aws eks describe-cluster --region "${REGION}" --query "cluster.identity.oidc.issuer" --name "${1}" --output text | grep "${REGION}" | cut -d '/' -f 5)
+
+    if [ $(aws iam list-open-id-connect-providers --region "${REGION}" | cut -d "/" -f4 | grep -c "${oidc_id}") -ge 1 ]; then
         echo_green " ${uni_check}\n" 
     else
         echo_red " ${uni_x}\n"
