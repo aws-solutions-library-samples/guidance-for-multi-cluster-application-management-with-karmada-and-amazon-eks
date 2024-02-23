@@ -318,7 +318,7 @@ function eks_lb_deploy () {
     
     # Wait for the load balancer to be available
     echo_orange "\t${uni_circle_quarter} Waiting for the load balancer to become ready"  
-    LB_ARN=$(aws elbv2 describe-load-balancers --region "${REGION}" | jq -r '.LoadBalancers[].LoadBalancerArn' | xargs -I {} aws elbv2 describe-tags --region "${REGION}" --resource-arns {} --query "TagDescriptions[?Tags[?Key=='kubernetes.io/service-name'&&Value=='karmada-system/karmada-service-loadbalancer']].ResourceArn" --output text)
+    LB_ARN=$(aws elbv2 describe-load-balancers --region "${REGION}" | jq -r '.LoadBalancers[].LoadBalancerArn' | xargs -I {} aws elbv2 describe-tags --region "${REGION}" --resource-arns {} --query "TagDescriptions[?Tags[?Key=='kubernetes.io/service-name'&&Value=='karmada-system/karmada-service-loadbalancer']].ResourceArn" --output text | tail -1)
     LB_STATUS=$(aws elbv2 describe-load-balancers --region "${REGION}" --load-balancer-arns "${LB_ARN}" --query 'LoadBalancers[].State.Code' --output text)
     # Keep checking until load balancer status is active
     while [ "$LB_STATUS" != "active" ]
