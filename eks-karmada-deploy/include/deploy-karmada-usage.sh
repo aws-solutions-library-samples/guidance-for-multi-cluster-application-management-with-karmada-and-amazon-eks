@@ -21,7 +21,7 @@ while getopts ":e:v:r:c:n:p:m:a:s:k:dhztuw" opt; do
     e) EKS_VERSION="${OPTARG}";;
     v) VPC_NAME="${OPTARG}";;
     r) REGION="${OPTARG}";;
-    c) CLUSTERS_NAME="${OPTARG}";;
+    c) CLUSTERS_NAME="$(echo ${OPTARG} | tr '[:upper:]' '[:lower:]')";;
     n) CLUSTER_NODES_NUM="${OPTARG}"; 
         [[ ${CLUSTER_NODES_NUM} -lt 3 ]] && { echo_red "This script deploys Karmada in high availability mode and you need at least 3 nodes for your cluster.\nPlease adjuct the parameter -n to 3 or more\n"; exit 1;} ;;
     p) CLUSTER_VCPUS="${OPTARG}";;
