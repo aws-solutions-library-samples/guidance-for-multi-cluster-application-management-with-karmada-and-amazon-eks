@@ -18,14 +18,10 @@ public class Constants {
     static final String REGION_AZB = "b";
     static final String REGION_AZC = "c";
 
-//    public static final String ARN_AWS_IAM_USER = "arn:aws:iam::<ACCOUNT_ID>:user/<USER>";
-//    public static final String ARN_AWS_IAM = "arn:aws:iam::";
-//    public static final String ARN_AWS_USER = ":user/";
-//        <USER>";
-
     static final String KARMADA_SG = "karmada-sg";
     static final int TCP_PORT = 32443;
     static final int HTTPS_PORT = 443;
+    static final int HTTP_PORT = 80;
     static final String KARMADA_CLUSTER = "karmada-eks-cluster-parent";
     static final String SG_DESCRIPTION = "Access to the KARMADA clusters";
     static final String MASTERS_ROLE = "MastersRole";
@@ -102,5 +98,20 @@ public class Constants {
     static final String ACCOUNT_ID = "ACCOUNT_ID";
     static final String CDK_DEFAULT_ACCOUNT = "CDK_DEFAULT_ACCOUNT";
     static final String CDK_DEFAULT_ACCOUNT1 = "CDK_DEFAULT_REGION";
+
+    static final String FLOW_LOG_CLOUD_WATCH = "FlowLogCloudWatch";
+
+    //Suppressions
+    static final String AWS_SOLUTIONS_IAM_4 = "AwsSolutions-IAM4";
+    static final String AWS_SOLUTIONS_IAM_5 = "AwsSolutions-IAM5";
+    static final String AWS_SOLUTIONS_EC_23 = "AwsSolutions-EC23";
+    static final String AWS_SOLUTIONS_EC_28 = "AwsSolutions-EC28";
+    static final String AWS_SOLUTIONS_EC_29 = "AwsSolutions-EC29";
+    static final String AWS_SOLUTIONS_IAM_4_SUPPRESSION = "AwsSolutions-IAM4 Suppression";
+    static final String SUPPRESS_IN_ROLES_FOR_THE_SAKE_OF_SIMPLICITY = "Suppress * in roles for the sake of simplicity";
+    static final String AWS_SOLUTIONS_EC2_23_SUPPRESSION = "AwsSolutions-EC23 Suppression";
+    static final String AWS_SOLUTIONS_EC2_28_SUPPRESSION = "AwsSolutions-EC28 Suppression";
+    static final String AWS_SOLUTIONS_EC2_29_SUPPRESSION = "AwsSolutions-EC29 Suppression";
+    static final String EKS_AMAZONAWS_COM = "eks.amazonaws.com";
 
 }

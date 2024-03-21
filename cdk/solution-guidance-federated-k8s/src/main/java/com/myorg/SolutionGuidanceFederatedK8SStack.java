@@ -1,14 +1,15 @@
 package com.myorg;
 
+import io.github.cdklabs.cdknag.NagPackSuppression;
+import io.github.cdklabs.cdknag.NagSuppressions;
 import software.amazon.awscdk.Stack;
 import software.amazon.awscdk.StackProps;
-import software.amazon.awscdk.services.ec2.IpAddresses;
-import software.amazon.awscdk.services.ec2.SubnetConfiguration;
-import software.amazon.awscdk.services.ec2.SubnetType;
-import software.amazon.awscdk.services.ec2.Vpc;
+import software.amazon.awscdk.services.ec2.*;
 import software.constructs.Construct;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.myorg.Constants.*;
 
@@ -47,6 +48,12 @@ public class SolutionGuidanceFederatedK8SStack extends Stack {
 
 //        ResourceNestedStackProps resourceNestedStackProps = new ResourceNestedStackProps().clusterName(CHILD_CLUSTER).vpc(vpc).securityGroup(securityGroup);
 //        new SolutionGuidanceFederatedK8SNestedStack(this, CHILD_CLUSTERNESTED_STACK_ID, resourceNestedStackProps);
+
+        NagSuppressions.addStackSuppressions(this,
+                Arrays.asList(NagPackSuppression.builder().id(AWS_SOLUTIONS_IAM_5).reason(SUPPRESS_IN_ROLES_FOR_THE_SAKE_OF_SIMPLICITY).build(),
+                        NagPackSuppression.builder().id(AWS_SOLUTIONS_IAM_4).reason(AWS_SOLUTIONS_IAM_4_SUPPRESSION).build(),
+                        NagPackSuppression.builder().id("AwsSolutions-AS3").reason("AwsSolutions-AS3 Suppresions").build(),
+                        NagPackSuppression.builder().id("AwsSolutions-EC26").reason("AwsSolutions-EC26 Suppresions").build()), Boolean.TRUE);
     }
 
     private static String getEnvVariable(String CDK_DEFAULT_ACCOUNT, String accountId) {
@@ -66,9 +73,15 @@ public class SolutionGuidanceFederatedK8SStack extends Stack {
     }
 
     private Vpc createVPC(SubnetConfiguration publicSubnet, SubnetConfiguration privateSubnet) {
+        Map<String, FlowLogOptions> flowLog = new HashMap<>();
+        flowLog.put(FLOW_LOG_CLOUD_WATCH, FlowLogOptions.builder()
+                .trafficType(FlowLogTrafficType.REJECT)
+                .maxAggregationInterval(FlowLogMaxAggregationInterval.ONE_MINUTE)
+                .build());
         return Vpc.Builder.create(this, KARMADA_VPC)
                 .ipAddresses(IpAddresses.cidr(KARMADA_CIDR_BLOCK))
                 .vpcName(KARMADA_VPC)
+                .flowLogs(flowLog)
                 .availabilityZones(Arrays.asList(this.region + REGION_AZA, this.region + REGION_AZB, this.region + REGION_AZC))
                 .natGateways(1)
                 .subnetConfiguration(Arrays.asList(publicSubnet, privateSubnet))
