@@ -1,5 +1,7 @@
 package com.myorg;
 
+import io.github.cdklabs.cdknag.NagPackSuppression;
+import io.github.cdklabs.cdknag.NagSuppressions;
 import software.amazon.awscdk.NestedStack;
 import software.amazon.awscdk.lambdalayer.kubectl.KubectlLayer;
 import software.amazon.awscdk.services.autoscaling.AutoScalingGroup;
@@ -33,6 +35,11 @@ public class KarmadaClusterStack extends NestedStack {
         final SecurityGroup securityGroup = createSecurityGroup(props.getVpc());
         this.karmadaCluster = createEKSCluster(KARMADA_CLUSTER, props.getVpc(), securityGroup, mastersRole);
         this.managementHostRole = createManagementHostRole(karmadaCluster, mastersRole, props.getRegion(), props.getAccountId());
+
+        NagSuppressions.addStackSuppressions(this,
+                Arrays.asList(NagPackSuppression.builder().id("AwsSolutions-EKS1").reason("AwsSolutions-EKS1 Suppression").build()));
+        NagSuppressions.addStackSuppressions(this,
+                Arrays.asList(NagPackSuppression.builder().id("AwsSolutions-L1").reason("AwsSolutions-L1 Suppression").build()), Boolean.TRUE);
     }
 
     public Cluster getKarmadaCluster() {
@@ -49,10 +56,15 @@ public class KarmadaClusterStack extends NestedStack {
 
     private Role createMastersRole() {
         Role mastersRole = Role.Builder.create(this, MASTERS_ROLE)
-                //.assumedBy(new ArnPrincipal(ARN_AWS_IAM + accountId + ARN_AWS_USER + ))
-                .assumedBy(new ServicePrincipal("eks.amazonaws.com"))
+                .assumedBy(new ServicePrincipal(EKS_AMAZONAWS_COM))
                 .roleName(MASTERS_ROLE)
                 .build();
+        NagSuppressions.addResourceSuppressions(mastersRole,
+                Arrays.asList(NagPackSuppression.builder()
+                        .id(AWS_SOLUTIONS_IAM_4)
+                        .reason(AWS_SOLUTIONS_IAM_4_SUPPRESSION)
+                        .build()));
+
         return mastersRole;
     }
 
@@ -127,6 +139,12 @@ public class KarmadaClusterStack extends NestedStack {
                 .mastersRole(mastersRole)
                 .outputMastersRoleArn(Boolean.TRUE)
                 .build();
+        NagSuppressions.addResourceSuppressions(cluster,
+                Arrays.asList(NagPackSuppression.builder()
+                        .id("AwsSolutions-EKS1")
+                        .reason("AwsSolutions-EKS1 Suppresions")
+                        .build()));
+
         return cluster;
     }
 
@@ -139,6 +157,7 @@ public class KarmadaClusterStack extends NestedStack {
                 .vpcSubnets(SubnetSelection.builder().subnetType(SubnetType.PUBLIC).build())
                 .minCapacity(3)
                 .maxCapacity(3)
+
                 .instanceType(
                         InstanceType.of(INSTANCE_CLASS, INSTANCE_SIZE))
                 .machineImage(EksOptimizedImage.Builder
@@ -187,13 +206,6 @@ public class KarmadaClusterStack extends NestedStack {
                 .create()
                 .effect(Effect.ALLOW)
                 .resources(ALL_RESOURCES_LIST)
-                .actions(S3_POLICIES_LIST)
-                .build());
-
-        bastionHostLinuxRole.addToPolicy(PolicyStatement.Builder
-                .create()
-                .effect(Effect.ALLOW)
-                .resources(ALL_RESOURCES_LIST)
                 .actions(EC2_POLICIES_LIST)
                 .build());
 
@@ -231,10 +243,17 @@ public class KarmadaClusterStack extends NestedStack {
     private SecurityGroup createSecurityGroup(Vpc vpc) {
         SecurityGroup karmadaClusterSecurityGroup = new SecurityGroup(this, KARMADA_SG, SecurityGroupProps.builder()
                 .vpc(vpc)
+                .securityGroupName(KARMADA_SG)
                 .allowAllOutbound(Boolean.TRUE)
                 .build());
         karmadaClusterSecurityGroup.addIngressRule(Peer.anyIpv4(), Port.tcp(TCP_PORT), SG_DESCRIPTION);
         karmadaClusterSecurityGroup.addIngressRule(Peer.ipv4(KARMADA_CIDR_BLOCK), Port.tcp(HTTPS_PORT), SG_DESCRIPTION);
+
+        NagSuppressions.addResourceSuppressions(karmadaClusterSecurityGroup,
+                Arrays.asList(NagPackSuppression.builder()
+                        .id(AWS_SOLUTIONS_EC_23)
+                        .reason(AWS_SOLUTIONS_EC2_23_SUPPRESSION)
+                        .build()));
         return karmadaClusterSecurityGroup;
     }
 }

@@ -1,5 +1,7 @@
 package com.myorg;
 
+import io.github.cdklabs.cdknag.NagPackSuppression;
+import io.github.cdklabs.cdknag.NagSuppressions;
 import software.amazon.awscdk.NestedStack;
 import software.amazon.awscdk.services.ec2.*;
 import software.amazon.awscdk.services.eks.Cluster;
@@ -58,15 +60,31 @@ public class ManagementHostStack extends NestedStack {
                 .role(managementHostRole)
                 .build();
         bastionHostLinux.getNode().addDependency();
+
+        NagSuppressions.addResourceSuppressions(bastionHostLinux,
+                Arrays.asList(NagPackSuppression.builder()
+                        .id(AWS_SOLUTIONS_EC_28)
+                        .reason(AWS_SOLUTIONS_EC2_28_SUPPRESSION)
+                        .build(), NagPackSuppression.builder()
+                        .id(AWS_SOLUTIONS_EC_29)
+                        .reason(AWS_SOLUTIONS_EC2_29_SUPPRESSION)
+                        .build()));
+
         return bastionHostLinux;
     }
 
     private SecurityGroup createBastionHostLinuxSecurityGroup(Vpc vpc) {
         SecurityGroup securityGroup = new SecurityGroup(this, KARMADA_EC_2_EKS_SG, SecurityGroupProps.builder()
                 .vpc(vpc)
+                .securityGroupName(KARMADA_EC_2_EKS_SG)
                 .allowAllOutbound(Boolean.TRUE)
                 .build());
         securityGroup.addIngressRule(Peer.anyIpv4(), Port.tcp(22), SSH_ACCESS);
+        NagSuppressions.addResourceSuppressions(securityGroup,
+                Arrays.asList(NagPackSuppression.builder()
+                        .id(AWS_SOLUTIONS_EC_23)
+                        .reason(AWS_SOLUTIONS_EC2_23_SUPPRESSION)
+                        .build()));
         return securityGroup;
     }
 
