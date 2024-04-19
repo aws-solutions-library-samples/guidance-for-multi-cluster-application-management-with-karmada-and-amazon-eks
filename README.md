@@ -1,6 +1,6 @@
 # Multi-cluster application management with EKS and Karmada on AWS
 
-This implementation guide describes architectural considerations and configuration steps for deploying a federated Kubernetes environment in [Amazon Web Services (AWS)](https://aws.amazon.com) Cloud for [Amazon Elastic Kubernetes Service (Amazon EKS)](https://aws.amazon.com/eks) using CNCF Open Source Kubernetes Armada [(Karmada)](https://www.cncf.io/blog/2022/03/22/karmada-multi-cluster-management-with-an-ocean-of-nodes/) project. 
+This guidance describes architectural considerations and configuration steps for deploying a federated Kubernetes environment in [Amazon Web Services (AWS)](https://aws.amazon.com) Cloud for [Amazon Elastic Kubernetes Service (Amazon EKS)](https://aws.amazon.com/eks) using CNCF Open Source Kubernetes Armada [(Karmada)](https://www.cncf.io/blog/2022/03/22/karmada-multi-cluster-management-with-an-ocean-of-nodes/) project. 
 
 Karmada is a [Kubernetes](https://kubernetes.io/) cluster management system with advanced scheduling capabilities, which enables you to deploy and run your conatinerized applications across multiple Kubernetes clusters, with no changes to your applications structure. This guide focuses on deploying Karmada with highly available Amazon EKS clusters.
 
@@ -8,7 +8,7 @@ The intended audience of this guide are DevOps engineers, Cloud architects, syst
 
 ### Use cases
 
-With Karmada, organizations can streamline workload distribution, optimize resource utilization, and enhance resilience across diverse Kubernetes environments. Use cases for multi-cluster management with Karmada include:
+With Karmada, organizations can streamline application workload distribution, optimize resource utilization, and enhance resilience across diverse Kubernetes environments. Use cases for multi-cluster management with Karmada include:
 
 - Hybrid Deployments
 Karmada is instrumental in facilitating hybrid deployments, enabling organizations to seamlessly distribute applications across diverse environments, including on-premises data centers, AWS and other cloud providers. This enables organizations to leverage the benefits of both environments while ensuring consistent management and orchestration through Kubernetes. With Karmada, organizations can optimize resource utilization, enhance resilience, and maintain operational efficiency across their hybrid cloud infrastructure.
@@ -32,26 +32,6 @@ With Karmada, organizations can implement advanced deployment strategies such as
 
 The guidance for 'Multi-cluster application management with EKS and Karmada on AWS' guidance provides the following features:
 
-1. Instructions to deploy manually:
-
-    - Amazon EKS cluster to host Karmada control plane and act as a parent cluster for multi-cluster management.
-    - Karmada in high availability mode with network load balancer.
-    - Amazon EKS clusters to act as member clusters for Karmada.
-    - Sample workload using Karmada multi-cluster deployment replicas.
-
-2. Shell script to deploy automatically:
-
-    - Amazon EKS cluster to host Karmada control plane and act as a parent cluster for multi-cluster management.
-    - Karmada in high availability mode with network load balancer.
-    - Amazon EKS clusters to act as member clusters for Karmada.
-    - Sample workload using Karmada multi-cluster deployment replicas.
-
-3. CDK application to deploy automatically:
-
-    - Amazon VPC with 3 public and 3 private subnets with a NAT gateway.
-    - Management host (EC2 instance) for Amazon EKS and Karmada.
-    - Amazon EKS cluster to host Karmada control plane and act as a parent cluster for multi-cluster management.
-    - Karmada in high availability mode with network load balancer.
 
 ## Architecture overview
 
@@ -63,15 +43,15 @@ You can find below architecture diagrams of a sample Karmada based EKS Cluster a
 
 <div align="center">
 <!-- {% include image.html file="mcm_ekskarmada_images/karmada_ref_architecture1a.jpg" alt="Karmada cluster architecture" %} -->
-<img src="karmada_reference_architecture1a.jpg" width=80%>  
+<img src="ref_arch_figure1.png" width=80%>  
 <br/>
-*Figure 1: Multi-cluster application management with EKS and Karmada on AWS - managed clusters*
+Figure 1: Multi-cluster application management with EKS and Karmada on AWS - Karmada control plane and mamanged clusters
 </div>
 <div align="center">
 <!-- {% include image.html file="mcm_ekskarmada_images/karmada_reference_architecture2a.jpg" alt="Karmada application deployment architecture" %} -->
-<img src="karmada_reference_architecture2a.jpg" width=80%> 
+<img src="ref_arch_figure2.png" width=80%> 
 <br/>
-*Figure 2: Multi-cluster application management with EKS and Karmada on AWS - application deployment*
+Figure 2: Multi-cluster application management with EKS and Karmada on AWS - multi-cluster application deployment
 </div>
 
 Following this architecture, you should be able to:
@@ -79,7 +59,7 @@ Following this architecture, you should be able to:
 - Deploy applications on multiple Amazon EKS clusters that provide a highly available environment
 - Create the infrastructure that caters for workloads compliant with local regulation about data residency
 
-### Architecture workflows 
+### Architecture workflow steps 
 
 **Karmada Clusters Architecture Steps (Figure 1):**
 
@@ -89,7 +69,7 @@ Following this architecture, you should be able to:
 4. Karmada runs several components on the Amazon EKS compute nodes. To keep records of API objects and state, its API server uses its own etcd database.
 5. Karmada etcd database uses EBS volumes attached to compute nodes/EC2 instances to keep its state and consistency. All state changes and updates get persisted in EBS volumes across all EC2 compute nodes that host etcd pods.
 
-**Karmada Application Deployment Architecture Steps (figure 2):**
+**Karmada Application Deployment Architecture Steps (Figure 2):**
 
 1. User interacts with the Karmada API server (part of Karmada Control Plane) using the kubectl CLI with the Karmada plugin. User sends a command for multiple clusters, ex. a multi-region deployment of NGNIX application with  equal weight across two member EKS clusters.
 2. The Karmada Control Plane maintains the status and state of all member EKS clusters. Upon receiving the user request it interprets the requirement and instructs member clusters accordingly (e.g. run an NGINX deployment in each member cluster).
@@ -128,6 +108,28 @@ Make sure you have sufficient quota for each of the services implemented in this
 To view the service quotas for all AWS services in the documentation without switching pages, view the information in the [Service endpoints and quotas](https://docs.aws.amazon.com/general/latest/gr/aws-general.pdf#aws-service-information) page in the PDF instead.
 
 ## Deployment 
+Below are high level guidance deployment options available: 
+
+1. Instructions to deploy manually:
+
+    - Amazon EKS cluster to host Karmada control plane and act as a parent cluster for multi-cluster management.
+    - Karmada in high availability mode with network load balancer.
+    - Amazon EKS clusters to act as member clusters for Karmada.
+    - Sample workload using Karmada multi-cluster deployment replicas.
+
+2. Shell script to deploy automatically:
+
+    - Amazon EKS cluster to host Karmada control plane and act as a parent cluster for multi-cluster management.
+    - Karmada in high availability mode with network load balancer.
+    - Amazon EKS clusters to act as member clusters for Karmada.
+    - Sample workload using Karmada multi-cluster deployment replicas.
+
+3. CDK application to deploy automatically:
+
+    - Amazon VPC with 3 public and 3 private subnets with a NAT gateway.
+    - Management host (EC2 instance) for Amazon EKS and Karmada.
+    - Amazon EKS cluster to host Karmada control plane and act as a parent cluster for multi-cluster management.
+    - Karmada in high availability mode with network load balancer.
 
 Please refer to [IMPLEMENTATION GUIDE](https://implementationguides.kits.eventoutfitters.aws.dev/mcm-karmada-0116/compute/multi-cluster-management-with-amazon-eks-karmada.html)
 
