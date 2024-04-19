@@ -45,13 +45,13 @@ You can find below architecture diagrams of a sample Karmada based EKS Cluster a
 <!-- {% include image.html file="mcm_ekskarmada_images/karmada_ref_architecture1a.jpg" alt="Karmada cluster architecture" %} -->
 <img src="ref_arch_figure1.png" width=80%>  
 <br/>
-Figure 1: Multi-cluster application management with EKS and Karmada on AWS - Karmada control plane and mamanged clusters
+Figure 1: Multi-cluster application management with EKS and Karmada on AWS - Karmada control plane and managed clusters
 </div>
 <div align="center">
 <!-- {% include image.html file="mcm_ekskarmada_images/karmada_reference_architecture2a.jpg" alt="Karmada application deployment architecture" %} -->
 <img src="ref_arch_figure2.png" width=80%> 
 <br/>
-Figure 2: Multi-cluster application management with EKS and Karmada on AWS - multi-cluster application deployment
+Figure 2: Multi-cluster application management with EKS and Karmada on AWS - application deployment example
 </div>
 
 Following this architecture, you should be able to:
