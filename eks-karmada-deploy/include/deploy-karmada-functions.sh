@@ -362,7 +362,7 @@ function eks_karmada_deploy () {
     # Check if karmada is initialised correctly
     echo_orange "\t${uni_circle_quarter} check if karmada is correctly initialised"
     # Use awk to count the pods
-    karmadapodcounts=$(kubectl get pods --no-headers -n karmada-system | awk '/etcd/ { etcd++ } /apiserver/ { apiserver++ } /aggregated-apiserver/ { aggregated_apiserver++ } /controller-manager/ { controller_manager++ } /scheduler/ { scheduler++ } /webhook/ { webhook++ } END { print etcd, apiserver, aggregated_apiserver, controller_manager, scheduler, webhook }')
+    karmadapodcounts=$(kubectl get pods --no-headers -n karmada-system | awk '/etcd/ { etcd++ } /apiserver/ { apiserver++ } /aggregated-apiserver/ { aggregated_apiserver++ } /controller-manager/ { controller_manager++ } /scheduler/ { scheduler++ } /webhook/ { webhook++ } END { printf "%d %d %d %d %d %d", etcd, apiserver, aggregated_apiserver, controller_manager, scheduler, webhook }')
     read etcd_count apiserver_count aggregated_apiserver_count controller_manager_count scheduler_count webhook_count <<< "$karmadapodcounts"
 
     # Check that we have all the required pods running
