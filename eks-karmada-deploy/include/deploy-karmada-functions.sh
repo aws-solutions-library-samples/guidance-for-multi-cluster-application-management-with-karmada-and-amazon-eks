@@ -357,7 +357,7 @@ function eks_karmada_deploy () {
 
     # Check if karmada is already initialised
     echo_orange "\t${uni_circle_quarter} check if karmada is already initialised"
-    [[ $(kubectl get deployments -n karmada-system -o name | wc -l) -ge 1 ]] && { echo_green " ${uni_check}\n"; karmadainit=0 } || { echo_red " ${uni_x}\n"; karmadainit=0; }
+    [[ $(kubectl get deployments -n karmada-system -o name | wc -l) -ge 1 ]] && { echo_green " ${uni_check}\n"; karmadainit = 0; } || { echo_red " ${uni_x}\n"; karmadainit=0; }
 
     # Check if karmada is initialised correctly if it is already initialised
     if [ karmadainit -eq 0 ]; then 
