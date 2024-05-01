@@ -359,6 +359,20 @@ function eks_karmada_deploy () {
     echo_orange "\t${uni_circle_quarter} check if karmada is already initialised"
     [[ $(kubectl get deployments -n karmada-system -o name | wc -l) -ge 1 ]] && { echo_green " ${uni_check}\n"; return 0; } || { echo_red " ${uni_x}\n"; }
 
+    # Check if karmada is initialised correctly
+    echo_orange "\t${uni_circle_quarter} check if karmada is correctly initialised"
+    # Use awk to count the pods
+    karmadapodcounts=$(kubectl get pods --no-headers | awk '/etcd/ { etcd++ } /apiserver/ { apiserver++ } /aggregated-apiserver/ { aggregated_apiserver++ } /controller-manager/ { controller_manager++ } /scheduler/ { scheduler++ } /webhook/ { webhook++ } END { print etcd, apiserver, aggregated_apiserver, controller_manager, scheduler, webhook }')
+    read etcd_count apiserver_count aggregated_apiserver_count controller_manager_count scheduler_count webhook_count <<< "$karmadapodcounts"
+
+    # Check that we have all the required pods running
+    if [ "$etcd_count" -lt "3" ] || [ "$apiserver_count" -lt "3" ] || [ "$aggregated_apiserver_count" -lt "1" ] || [ "$controller_manager_count" -lt "1" ] || [ "$scheduler_count" -lt "1" ] || [ "$webhook_count" -lt "1" ]; then
+	echo_red " ${uni_x} Karmada deployment seems not to have the correct pods running, please check and run the script again\n"
+	exit 5
+    else
+	echo_green " ${uni_check}\n"
+    fi
+
     # Deploy the Karmada cluster
     # we use the public IP address of the first network load balancer instance as the kube api does not support multiple IP addresses
     # This is required for the init phase and internal karmada sync operations. All user-facing operation go through the load balancer DNS name
