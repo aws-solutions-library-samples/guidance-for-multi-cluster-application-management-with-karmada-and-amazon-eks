@@ -360,14 +360,14 @@ function eks_karmada_deploy () {
     [[ $(kubectl get deployments -n karmada-system -o name | wc -l) -ge 1 ]] && { echo_green " ${uni_check}\n"; karmadainit = 0; } || { echo_red " ${uni_x}\n"; karmadainit=0; }
 
     # Check if karmada is initialised correctly if it is already initialised
-    if [ karmadainit -eq 0 ]; then 
+    if [ "${karmadainit}" -eq 0 ]; then 
 
 	    echo_orange "\t${uni_circle_quarter} check if karmada is correctly initialised"
 	    karmadapodcounts=$(kubectl get pods --no-headers -n karmada-system | awk '/etcd/ { etcd++ } /apiserver/ { apiserver++ } /aggregated-apiserver/ { aggregated_apiserver++ } /controller-manager/ { controller_manager++ } /scheduler/ { scheduler++ } /webhook/ { webhook++ } END { printf "%d %d %d %d %d %d", etcd, apiserver, aggregated_apiserver, controller_manager, scheduler, webhook }')
     	read etcd_count apiserver_count aggregated_apiserver_count controller_manager_count scheduler_count webhook_count <<< "$karmadapodcounts"
 
     	# Check that we have all the required pods running
-    	if [ "$etcd_count" -lt "3" ] || [ "$apiserver_count" -lt "3" ] || [ "$aggregated_apiserver_count" -lt "1" ] || [ "$controller_manager_count" -lt "1" ] || [ "$scheduler_count" -lt "1" ] || [ "$webhook_count" -lt "1" ]; then
+    	if [ "${etcd_count}" -lt "3" ] || [ "${apiserver_count}" -lt "3" ] || [ "${aggregated_apiserver_count}" -lt "1" ] || [ "${controller_manager_count}" -lt "1" ] || [ "${scheduler_count}" -lt "1" ] || [ "${webhook_count}" -lt "1" ]; then
 		echo_red " ${uni_x} Karmada deployment seems not to have the correct pods running, please check and run the script again\n"
 		exit 5
     	else
