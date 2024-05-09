@@ -68,7 +68,7 @@ Figure 2: Multi-cluster application management with Amazon EKS and Karmada on AW
 4. The EKS cluster member 2 receives instructions from Karmada Control Plane to deploy and run an NGINX container application deployment.<br/>
 5. The EKS Karmada Control Plane cluster checks application deployment status on the member clusters and updates state in its etcd database.<br/>
 6. User validates the status of multi-cluster application deployment communicating with Karmada Control Plane via kubectl Karmada CLI.<br/>
-
+<br/><br/>
 Following this architecture, you should be able to:
 
 - Deploy applications on multiple Amazon EKS clusters that provide a highly available environment
