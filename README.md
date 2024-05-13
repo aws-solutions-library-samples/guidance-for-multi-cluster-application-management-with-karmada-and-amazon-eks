@@ -108,7 +108,7 @@ The following table provides a sample cost breakdown for deploying this guidance
 
 | **AWS service**  | Dimensions | Cost, month \[USD\] |
 |-----------|------------|------------|
-| Amazon EKS  | 1 cluster | \$ 219\ |
+| Amazon EKS  | 1 cluster | \$ 219 |
 | Amazon EC2  | 3 EC2 compute cluster nodes in each of the 3 clusters | \$ 328.50 |
 | Amazon EBS  | 5GB worth of EBS disk gp3 type | \$ 1.25 |
 | Amazon ELB  | 1 Network Load Balancer | \$ 20.81 <sup>*</sup>|
