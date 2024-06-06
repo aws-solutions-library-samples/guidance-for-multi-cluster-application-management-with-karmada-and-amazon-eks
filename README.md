@@ -1,8 +1,11 @@
+![image](https://github.com/aws-solutions-library-samples/guidance-for-multi-cluster-management-eks-karmada/assets/42846514/2f70fca2-fb6c-481b-be17-a0a9b3a4416d)
+![image](https://github.com/aws-solutions-library-samples/guidance-for-multi-cluster-management-eks-karmada/assets/42846514/3d3dddd3-a835-4760-865a-f4119e8c838b)
 # Multi-cluster application management with Amazon EKS and Karmada on AWS
 
 This guidance describes architectural considerations and configuration steps for deploying a federated Kubernetes environment in [Amazon Web Services (AWS)](https://aws.amazon.com) Cloud for [Amazon Elastic Kubernetes Service (Amazon EKS)](https://aws.amazon.com/eks) using CNCF Open Source Kubernetes Armada [(Karmada)](https://www.cncf.io/blog/2022/03/22/karmada-multi-cluster-management-with-an-ocean-of-nodes/) project. 
 
-Karmada is a [Kubernetes](https://kubernetes.io/) cluster management system with advanced scheduling capabilities, which enables you to deploy and run your conatinerized applications across multiple Kubernetes clusters, with no changes to your applications structure. This guide focuses on deploying Karmada with highly available Amazon EKS clusters.
+Karmada is a [Kubernetes](https://kubernetes.io/) cluster management system with advanced scheduling capabilities, which enables you to deploy and run your conta![image](https://github.com/aws-solutions-library-samples/guidance-for-multi-cluster-management-eks-karmada/assets/42846514/cbc3d0c1-923b-4e59-992c-18cb05a42c92)
+inerized applications across multiple Kubernetes clusters, with no changes to your applications structure. This guide focuses on deploying Karmada with highly available Amazon EKS clusters.
 
 The intended audience of this guide are DevOps engineers, Cloud architects, system administrators, and platform engineers who would like to get hands-on experience architecting cloud-native applications in the AWS Cloud and are familiar with Kubernetes technology.
 
@@ -33,11 +36,11 @@ The Guidance for Multi-cluster application management with Amazon EKS and Karmad
 
 ## Architecture overview
 
-Below are architecture diagrams of a sample Karamada based Cluster architecture with parent and managed clusters and its centralized containerized application deployment process to those clusters. 
+Below are architecture diagrams of a sample Karmada based Cluster architecture with parent and managed clusters and its centralized containerized application deployment process to those clusters. 
 
 ### Architecture diagrams and workflow steps
 
-You can find below architecture diagrams of a sample Karmada based EKS Cluster architecture with parent and managed clusters and depction of centralized containerized application deployment process to those clusters. 
+You can find below architecture diagrams of a sample Karmada based EKS Cluster architecture with parent and managed clusters and depiction of centralized containerized application deployment process to those clusters. 
 
 <div align="center">
 <!-- {% include image.html file="mcm_ekskarmada_images/karmada_ref_architecture1a.jpg" alt="Karmada cluster architecture" %} -->
@@ -104,7 +107,7 @@ We recommend creating a [budget](https://docs.aws.amazon.com/cost-management/la
 
 ### Estimated monthly cost breakdown
 
-The following table provides a sample cost breakdown for deploying this guidance with 3 Amazon EKS clusters (one Karamada control plane and 2 managed clusters) in the US-East-1 `us-east-1` region for one month. The AWS cost calculator is available [here](https://calculator.aws/#/estimate?id=03fdada5a7299a7b70c51a6c9b0037cd0117cbfc). Please that cost calculations are based on the default configuration options of the [End-to-end, fully automated](#end-to-end-fully-automated) guidance deployment method described below.
+The following table provides a sample cost breakdown for deploying this guidance with 3 Amazon EKS clusters (one Karmada control plane and 2 managed clusters) in the US-East-1 `us-east-1` region for one month. The AWS cost calculator is available [here](https://calculator.aws/#/estimate?id=03fdada5a7299a7b70c51a6c9b0037cd0117cbfc). Please that cost calculations are based on the default configuration options of the [End-to-end, fully automated](#end-to-end-fully-automated) guidance deployment method described below.
 
 | **AWS service**  | Dimensions | Cost, month \[USD\] |
 |-----------|------------|------------|
@@ -114,7 +117,7 @@ The following table provides a sample cost breakdown for deploying this guidance
 | Amazon ELB  | 1 Network Load Balancer | \$ 20.81 <sup>*</sup>|
 | NAT Gateway | 1 instance | \$ 112.05 | 
 | Public IP address | 9 IPs | \$ 32.85 |
-| **TOTAL** |  | **\$ 714.41** |
+| **TOTAL estimate** |  | **\$ 714.41** |
 
 NOTE:
 <sup>*</sup> An NLCU measures the dimensions on which the Network Load Balancer processes your traffic (averaged over an hour). The three dimensions measured are: <br/>  - New connections or flows: Number of newly established connections/flows per second. Many technologies (HTTP, WebSockets, etc.) reuse Transmission Control Protocol (TCP) connections for efficiency. The number of new connections is typically lower than your request or message count. <br/>  - Active connections or flows: Peak concurrent connections/flows, sampled minutely. <br/>  - Processed bytes: The number of bytes processed by the load balancer in GBs. <br/>  You are charged only on one of those dimensions that has the highest usage for the hour.
@@ -125,9 +128,9 @@ When you build systems on AWS infrastructure, security responsibilities are shar
 
 This guidance relies on a lot of reasonable default options and "principle of least privilege" access for all resources. Users that deploy it in production should go through all the deployed resources and ensure those defaults comply with their security requirements and policies, have adequate logging levels and alarms enabled and protect access to publicly exposed APIs. Since the Kubernetes clusters should be able to communicate with each other and can be deployed on different VPCs, AWS regions, AWS accounts or even in non-AWS infrastructure, this solution assumes publicly exposed Kubernetes APIs that utilize inherent Kubernetes mechanisms to protect access. 
 
-Using this solution you also expose publicly the Karmada API service on port `tcp/32443` that utilizes inherent certificate based access control to protect unauthorized access. In case those certificates are exposed and a malicious user gets access to the Karmada API service, they then will be able to create or manipulate any workloads managed by Karmada, such as multicluster deployments. To minimize the attack surface and enhanche protection to your publicly exposed Kubernetes and Karmada APIs you should adjust accordingly the security groups attached to the Amazon EKS clusters and the Karmada load balancer and allow communication only from designated and authorized IP addresses or networks. 
+Using this solution you also expose publicly the Karmada API service on port `tcp/32443` that utilizes inherent certificate based access control to protect unauthorized access. In case those certificates are exposed and a malicious user gets access to the Karmada API service, they then will be able to create or manipulate any workloads managed by Karmada, such as multi-cluster deployments. To minimize the attack surface and enhance protection to your publicly exposed Kubernetes and Karmada APIs you should adjust accordingly the security groups attached to the Amazon EKS clusters and the Karmada load balancer and allow communication only from designated and authorized IP addresses or networks. 
 
-All resources deployed by this solution rely on inherent AWS security controls, including but not limited to VPC security groups, IAM users and roles and secuirty certificates. By default this solutions exposes only the necessary endpoints such as the Kubernetes API and the Karmada API protected with end-to-end encryption. 
+All resources deployed by this solution rely on inherent AWS security controls, including but not limited to VPC security groups, IAM users and roles and security certificates. By default, this solutions exposes only the necessary endpoints such as the Kubernetes API and the Karmada API protected with end-to-end encryption. 
 
 ## Supported AWS Regions
 
