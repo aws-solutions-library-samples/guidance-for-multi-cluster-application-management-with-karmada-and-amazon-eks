@@ -258,7 +258,7 @@ function eks_deploy_ebs () {
             echo '  "metadata": { "name": "ebs-sc" },'
             echo '  "provisioner": "ebs.csi.aws.com",'
             echo '  "volumeBindingMode": "WaitForFirstConsumer",'
-            echo '  "parameters": { "type": "gp3" }'
+            echo '  "parameters": { "type": "gp3", "encrypted": "true" }'
             echo '}'
         } > /tmp/$$.ebs-sc.json
 
