@@ -1,4 +1,4 @@
-package com.myorg;
+package com.aws;
 
 import org.jetbrains.annotations.Nullable;
 import software.amazon.awscdk.StackProps;

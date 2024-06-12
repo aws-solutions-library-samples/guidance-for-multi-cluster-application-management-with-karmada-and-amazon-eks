@@ -1,4 +1,4 @@
-package com.myorg;
+package com.aws;
 
 import io.github.cdklabs.cdknag.NagPackSuppression;
 import io.github.cdklabs.cdknag.NagSuppressions;
@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.myorg.Constants.*;
+import static com.aws.Constants.*;
 
 public class SolutionGuidanceFederatedK8SStack extends Stack {
 
@@ -52,8 +52,7 @@ public class SolutionGuidanceFederatedK8SStack extends Stack {
         NagSuppressions.addStackSuppressions(this,
                 Arrays.asList(NagPackSuppression.builder().id(AWS_SOLUTIONS_IAM_5).reason(SUPPRESS_IN_ROLES_FOR_THE_SAKE_OF_SIMPLICITY).build(),
                         NagPackSuppression.builder().id(AWS_SOLUTIONS_IAM_4).reason(AWS_SOLUTIONS_IAM_4_SUPPRESSION).build(),
-                        NagPackSuppression.builder().id("AwsSolutions-AS3").reason("AwsSolutions-AS3 Suppresions").build(),
-                        NagPackSuppression.builder().id("AwsSolutions-EC26").reason("AwsSolutions-EC26 Suppresions").build()), Boolean.TRUE);
+                        NagPackSuppression.builder().id("AwsSolutions-AS3").reason("AwsSolutions-AS3 Suppresions").build()), Boolean.TRUE);
     }
 
     private static String getEnvVariable(String CDK_DEFAULT_ACCOUNT, String accountId) {

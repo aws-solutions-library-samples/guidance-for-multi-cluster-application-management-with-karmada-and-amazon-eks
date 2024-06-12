@@ -1,11 +1,16 @@
-package com.myorg;
+package com.aws;
 
 import io.github.cdklabs.cdknag.NagPackSuppression;
 import io.github.cdklabs.cdknag.NagSuppressions;
+import org.jetbrains.annotations.NotNull;
 import software.amazon.awscdk.NestedStack;
 import software.amazon.awscdk.lambdalayer.kubectl.KubectlLayer;
 import software.amazon.awscdk.services.autoscaling.AutoScalingGroup;
+import software.amazon.awscdk.services.autoscaling.BlockDevice;
+import software.amazon.awscdk.services.autoscaling.BlockDeviceVolume;
+import software.amazon.awscdk.services.autoscaling.EbsDeviceVolumeType;
 import software.amazon.awscdk.services.autoscaling.UpdatePolicy;
+import software.amazon.awscdk.services.autoscaling.EbsDeviceOptions;
 import software.amazon.awscdk.services.ec2.*;
 import software.amazon.awscdk.services.eks.OpenIdConnectProvider;
 import software.amazon.awscdk.services.eks.*;
@@ -15,7 +20,7 @@ import software.constructs.Construct;
 import java.util.Arrays;
 import java.util.Map;
 
-import static com.myorg.Constants.*;
+import static com.aws.Constants.*;
 
 public class KarmadaClusterStack extends NestedStack {
 
@@ -155,9 +160,9 @@ public class KarmadaClusterStack extends NestedStack {
                 .vpc(vpc)
                 .securityGroup(securityGroup)
                 .vpcSubnets(SubnetSelection.builder().subnetType(SubnetType.PUBLIC).build())
+                .blockDevices(Arrays.asList(getBlockDevice()))
                 .minCapacity(3)
                 .maxCapacity(3)
-
                 .instanceType(
                         InstanceType.of(INSTANCE_CLASS, INSTANCE_SIZE))
                 .machineImage(EksOptimizedImage.Builder
@@ -168,6 +173,14 @@ public class KarmadaClusterStack extends NestedStack {
                 .updatePolicy(UpdatePolicy.rollingUpdate())
                 .build();
         return eksAsg;
+    }
+
+    @NotNull
+    private static BlockDevice getBlockDevice() {
+        return BlockDevice.builder().deviceName(DEVICE_PATH).volume(BlockDeviceVolume.ebs(10, EbsDeviceOptions.builder()
+                .volumeType(EbsDeviceVolumeType.GP3)
+                .encrypted(Boolean.TRUE)
+                .build())).build();
     }
 
     private void addManifest(Cluster cluster) {

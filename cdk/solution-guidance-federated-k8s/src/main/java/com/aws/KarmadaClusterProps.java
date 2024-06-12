@@ -1,4 +1,4 @@
-package com.myorg;
+package com.aws;
 
 import software.amazon.awscdk.NestedStackProps;
 import software.amazon.awscdk.services.ec2.Vpc;

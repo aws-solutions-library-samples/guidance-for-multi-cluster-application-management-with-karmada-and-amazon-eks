@@ -1,4 +1,4 @@
-package com.myorg;
+package com.aws;
 
 import software.amazon.awscdk.NestedStack;
 import software.amazon.awscdk.lambdalayer.kubectl.KubectlLayer;
@@ -11,8 +11,8 @@ import software.constructs.Construct;
 
 import java.util.Arrays;
 
-import static com.myorg.Constants.*;
-import static com.myorg.Constants.CHILD_EKSASG;
+import static com.aws.Constants.*;
+import static com.aws.Constants.CHILD_EKSASG;
 
 public class SolutionGuidanceFederatedK8SNestedStack extends NestedStack {
 

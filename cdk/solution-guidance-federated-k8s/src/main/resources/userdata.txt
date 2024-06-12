@@ -5,6 +5,6 @@ yum install -y git
 su -c "aws eks update-kubeconfig --region REGION --name karmada-eks-cluster-parent --role-arn MASTER_ROLE_ARN" ec2-user
 
 cd /home/ec2-user
-su -c "git clone git@github.com:soumplis/eks-karmada-project.git" ec2-user
+su -c "git clone https://github.com/aws-solutions-library-samples/guidance-for-multi-cluster-management-eks-karmada.git" ec2-user
 cd eks-karmada-project/eks-karmada-deploy
 su -c "bash -x /home/ec2-user/eks-karmada-project/eks-karmada-deploy/deploy-karmada-run.sh -r REGION -v karmada-vpc -c karmada-eks-cluster -k /home/ec2-user -u -t" ec2-user

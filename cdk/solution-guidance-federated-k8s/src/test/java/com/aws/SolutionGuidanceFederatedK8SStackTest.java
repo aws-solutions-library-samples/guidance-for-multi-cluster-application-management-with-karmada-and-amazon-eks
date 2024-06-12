@@ -1,13 +1,8 @@
-package com.myorg;
-
-import software.amazon.awscdk.App;
-import software.amazon.awscdk.assertions.Template;
-import software.amazon.awscdk.assertions.Match;
-import java.io.IOException;
-
-import java.util.HashMap;
+package com.aws;
 
 import org.junit.jupiter.api.Test;
+import software.amazon.awscdk.App;
+import software.amazon.awscdk.assertions.Template;
 
 public class SolutionGuidanceFederatedK8SStackTest {
 

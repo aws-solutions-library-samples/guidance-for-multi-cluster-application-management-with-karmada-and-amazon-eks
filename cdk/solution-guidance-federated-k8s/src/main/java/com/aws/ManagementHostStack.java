@@ -1,4 +1,4 @@
-package com.myorg;
+package com.aws;
 
 import io.github.cdklabs.cdknag.NagPackSuppression;
 import io.github.cdklabs.cdknag.NagSuppressions;
@@ -16,7 +16,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
 
-import static com.myorg.Constants.*;
+import static com.aws.Constants.*;
 
 public class ManagementHostStack extends NestedStack {
 
@@ -48,7 +48,7 @@ public class ManagementHostStack extends NestedStack {
                                 build()))
                 .blockDevices(Arrays.asList(BlockDevice.builder()
                         .volume(BlockDeviceVolume.ebs(10, EbsDeviceOptions.builder()
-                                .encrypted(true)
+                                .encrypted(Boolean.TRUE)
                                 .build()))
                         .deviceName(DEVICE_PATH)
                         .mappingEnabled(Boolean.FALSE)
