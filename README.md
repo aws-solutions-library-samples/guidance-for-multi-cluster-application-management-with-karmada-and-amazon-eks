@@ -1,11 +1,8 @@
-![image](https://github.com/aws-solutions-library-samples/guidance-for-multi-cluster-management-eks-karmada/assets/42846514/2f70fca2-fb6c-481b-be17-a0a9b3a4416d)
-![image](https://github.com/aws-solutions-library-samples/guidance-for-multi-cluster-management-eks-karmada/assets/42846514/3d3dddd3-a835-4760-865a-f4119e8c838b)
 # Multi-cluster application management with Amazon EKS and Karmada on AWS
 
 This guidance describes architectural considerations and configuration steps for deploying a federated Kubernetes environment in [Amazon Web Services (AWS)](https://aws.amazon.com) Cloud for [Amazon Elastic Kubernetes Service (Amazon EKS)](https://aws.amazon.com/eks) using CNCF Open Source Kubernetes Armada [(Karmada)](https://www.cncf.io/blog/2022/03/22/karmada-multi-cluster-management-with-an-ocean-of-nodes/) project. 
 
-Karmada is a [Kubernetes](https://kubernetes.io/) cluster management system with advanced scheduling capabilities, which enables you to deploy and run your conta![image](https://github.com/aws-solutions-library-samples/guidance-for-multi-cluster-management-eks-karmada/assets/42846514/cbc3d0c1-923b-4e59-992c-18cb05a42c92)
-inerized applications across multiple Kubernetes clusters, with no changes to your applications structure. This guide focuses on deploying Karmada with highly available Amazon EKS clusters.
+Karmada is a [Kubernetes](https://kubernetes.io/) cluster management system with advanced scheduling capabilities, which enables you to deploy and run your containerized applications across multiple Kubernetes clusters, with no changes to your applications structure. This guide focuses on deploying Karmada with highly available Amazon EKS clusters.
 
 The intended audience of this guide are DevOps engineers, Cloud architects, system administrators, and platform engineers who would like to get hands-on experience architecting cloud-native applications in the AWS Cloud and are familiar with Kubernetes technology.
 
@@ -79,22 +76,16 @@ Following this architecture, you should be able to:
 
 ### AWS services used in this Guidance
 
-| **AWS service**  | Description |
-|-----------|------------|
-| [Amazon Elastic Kubernetes Service (EKS)](https://aws.amazon.com/eks/)|Core service - EKS service is used to host the Karmada solution that uses containers. In essence it is an extension of the Kubernetes API.|
-| [Amazon Elastic Compute Cloud (EC2)](https://aws.amazon.com/ec2/)|Core service - EC2 service is used as the host of the containers needed for this solution.|
-[Amazon Virtual Private Cloud - VPC](https://aws.amazon.com/vpc/)| Core Service - network security layer |
-| [Amazon Elastic Conatiner Registry - ECR](http://aws.amazon.com/ecr/) | Supporting service -used for storing container images required by the runtimes. |
-| [Amazon Network Load Balancer (NLB)](https://aws.amazon.com/elasticloadbalancing/network-load-balancer/)|Supporting service - The NLB acts as a proxy for Karmada services running on Amazon EKS parent cluster. The load balancer is the entry point to interact with the Karmada API server and forwards traffic to any healthy backend node to make sure that the solution will still be working in case of any single node or availability zone failure.|
-| [Amazon Elastic Block Store (EBS)](https://aws.amazon.com/ebs)|Supporting service - EBS volumes are used by the Karmada etcd database attached to compute nodes/EC2 instances to keep its state and consistency. All state changes and updates get persisted in EBS volumes across all EC2 compute nodes that host etcd pods.|
-| [AWS Identity and Access Management (IAM)](https://aws.amazon.com/iam/)|Supporting service - AWS IAM service is used for the creation of an IAM user with adequate permissions to create and delete Amazon EKS clusters access.|
+| **AWS service**  | Role | Description |
+|-----------|------------|-------------|
+| [Amazon Elastic Kubernetes Service (EKS)](https://aws.amazon.com/eks/)| Core service |  EKS service is used to host the Karmada solution that uses containers. In essence it is an extension of the Kubernetes API.|
+| [Amazon Elastic Compute Cloud (EC2)](https://aws.amazon.com/ec2/)| Core service | EC2 service is used as the host of the containers needed for this solution.|
+[Amazon Virtual Private Cloud - VPC](https://aws.amazon.com/vpc/)| Core Service | Network security layer |
+| [Amazon Elastic Conatiner Registry - ECR](http://aws.amazon.com/ecr/) | Supporting service | Used for storing container images required by the runtimes. |
+| [Amazon Network Load Balancer (NLB)](https://aws.amazon.com/elasticloadbalancing/network-load-balancer/)|Supporting service | The NLB acts as a proxy for Karmada services running on Amazon EKS parent cluster. The load balancer is the entry point to interact with the Karmada API server and forwards traffic to any healthy backend node to make sure that the solution will still be working in case of any single node or availability zone failure.|
+| [Amazon Elastic Block Store (EBS)](https://aws.amazon.com/ebs)|Supporting service | Encrypted EBS volumes are used by the Karmada etcd database attached to compute nodes/EC2 instances to keep its state and consistency. All state changes and updates get persisted in EBS volumes across all EC2 compute nodes that host etcd pods.|
+| [AWS Identity and Access Management (IAM)](https://aws.amazon.com/iam/)|Supporting service |  AWS IAM service is used for the creation of an IAM user with adequate permissions to create and delete Amazon EKS clusters access.|
 
-<!--
-## Security
-When you build systems on AWS infrastructure, security responsibilities are shared between you and AWS. This [shared responsibility model](https://aws.amazon.com/compliance/shared-responsibility-model/) reduces your operational burden because AWS operates, manages, and controls the components including the host operating system, the virtualization layer, and the physical security of the facilities in which the services operate. For more information about AWS security visit [AWS Cloud Security](http://aws.amazon.com/security/).
-
-For the purposes of this guidance, you have to leverage the use of [VPC security groups](https://docs.aws.amazon.com/managedservices/latest/userguide/about-security-groups.html) and [IAM users and roles](https://docs.aws.amazon.com/IAM/latest/UserGuide/id.html). Access to solution components is controlled through VPC security groups and IAM policies. A Security group allowing TCP port 32443 is automatically created for the NLB. This group is attached to all Karmada cluster nodes. An IAM user with permissions to create and delete EKS clusters (admin level access) is also required.
--->
 ## Plan your deployment
 
 This guidance is based on Amazon EKS as Kubernetes cluster to host Karmada and manage other Amazon EKS clusters. However, as Karmada is an extension to the native [Kubernetes API](https://kubernetes.io/docs/concepts/overview/kubernetes-api/), you can extend this solution and expand the multi-cluster management to any Kubernetes cluster, no matter of the deployment method, tool or location.
@@ -170,6 +161,7 @@ Below are high level guidance deployment options available:
     - Amazon EKS cluster to host Karmada control plane and act as a parent cluster for multi-cluster management.
     - Karmada in high availability mode with network load balancer.
 
+**TO DO: UPDATE WITH LIVE IG LINK FOR PUBLICATION **
 Please refer to [IMPLEMENTATION GUIDE](https://implementationguides.kits.eventoutfitters.aws.dev/mcm-karmada-0116/compute/multi-cluster-management-with-amazon-eks-karmada.html) for detailed instructions for all deployment options above. 
 
 ## Security
