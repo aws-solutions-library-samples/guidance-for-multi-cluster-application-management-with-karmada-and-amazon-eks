@@ -2,9 +2,9 @@
 
 This guidance describes architectural considerations and configuration steps for deploying a federated Kubernetes environment in [Amazon Web Services (AWS)](https://aws.amazon.com) Cloud for [Amazon Elastic Kubernetes Service (Amazon EKS)](https://aws.amazon.com/eks) using CNCF Open Source Kubernetes Armada [(Karmada)](https://www.cncf.io/blog/2022/03/22/karmada-multi-cluster-management-with-an-ocean-of-nodes/) project. 
 
-Karmada is a [Kubernetes](https://kubernetes.io/) cluster management system with advanced scheduling capabilities, which enables you to deploy and run your containerized applications across multiple Kubernetes clusters, with no changes to your applications structure. This guide focuses on deploying Karmada with highly available Amazon EKS clusters.
+Karmada is a [Kubernetes](https://kubernetes.io/) cluster management system with advanced scheduling capabilities, which enables you to deploy and run your containerized applications across multiple Kubernetes clusters, with no changes to your applications structure. This guidance focuses on deploying Karmada with highly available Amazon EKS clusters.
 
-The intended audience of this guide are DevOps engineers, Cloud architects, system administrators, and platform engineers who would like to get hands-on experience architecting cloud-native applications in the AWS Cloud and are familiar with Kubernetes technology.
+The intended audience of this guidance are DevOps engineers, Cloud architects, system administrators, and platform engineers who would like to get hands-on experience architecting cloud-native applications in the AWS Cloud and are familiar with Kubernetes technology.
 
 ### Use cases
 
@@ -54,9 +54,9 @@ You can find below architecture diagrams of a sample Karmada based EKS Cluster a
 <br/><br/>
 <div align="center">
 <!-- {% include image.html file="mcm_ekskarmada_images/karmada_reference_architecture2a.jpg" alt="Karmada application deployment architecture" %} -->
-<img src="multi-cluster-application-management-with-karmada-and-amazon-eks-karmada-control-plane.png" width=70%> 
+<img src="multi-cluster-application-management-with-karmada-and-amazon-eks-karmada-managed-amazon-eks-cluster.png" width=70%> 
 <br/>
-<i>Figure 2: Multi-cluster application management with Amazon EKS and Karmada on AWS - application deployment example</i>
+<i>Figure 2: Multi-cluster application management with Amazon EKS and Karmada on AWS - Application deployment </i>
 </div>
 
 <br/>
@@ -122,6 +122,8 @@ This guidance relies on a lot of reasonable default options and "principle of le
 Using this solution you also expose publicly the Karmada API service on port `tcp/32443` that utilizes inherent certificate based access control to protect unauthorized access. In case those certificates are exposed and a malicious user gets access to the Karmada API service, they then will be able to create or manipulate any workloads managed by Karmada, such as multi-cluster deployments. To minimize the attack surface and enhance protection to your publicly exposed Kubernetes and Karmada APIs you should adjust accordingly the security groups attached to the Amazon EKS clusters and the Karmada load balancer and allow communication only from designated and authorized IP addresses or networks. 
 
 All resources deployed by this solution rely on inherent AWS security controls, including but not limited to VPC security groups, IAM users and roles and security certificates. By default, this solutions exposes only the necessary endpoints such as the Kubernetes API and the Karmada API protected with end-to-end encryption. 
+
+**NOTE**: Please note that by cloning and using 3rd party open-source code you assume responsibility for its patching/securing/managing in the context of this project.
 
 ## Supported AWS Regions
 
