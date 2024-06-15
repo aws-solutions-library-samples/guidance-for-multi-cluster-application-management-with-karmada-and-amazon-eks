@@ -39,7 +39,7 @@ echo_green "${uni_right_triangle} Prepare some parameters\n"
     ACCOUNTID="$(aws sts get-caller-identity --query "Account" --output text)"
     echo_orange "\t${uni_check} Account ID: ${ACCOUNTID}\n"
 
-[[ ${SKIP_USAGE} != "true" ]] && { echo_green "${uni_right_triangle} Deploy cloudformation stack for usage recording\n"; solution_usage_code; }
+[[ ${SKIP_USAGE} != "true" ]] && { echo_green "${uni_right_triangle} Deploy cloudformation stack for statistical purpose\n"; solution_usage_code; }
 
 echo_green "${uni_right_triangle} Creating the Karmada parent cluster\n"
     eks_create_cluster "${CLUSTERS_NAME}-parent"

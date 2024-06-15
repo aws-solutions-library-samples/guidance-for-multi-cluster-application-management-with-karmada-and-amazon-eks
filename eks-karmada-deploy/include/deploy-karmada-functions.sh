@@ -23,7 +23,7 @@ function solution_usage_code () {
     # Function that deploys a simple cloudformation stack to create an SSM Parameter for recording purposes of solution usage
     # The use o SSM parameter does not add any security risk and is at no cost
     { echo '{ "AWSTemplateFormatVersion" : "2010-09-09",'
-      echo '"Description" : "TR-1234 Multi-cluster Solutions Guidance Tracking",'
+      echo '"Description" : "Guidance for Federated Kubernetes on AWS (SO9472)",'
       echo '"Resources" : {'
       echo '    "NoopParam": { "Type": "AWS::SSM::Parameter",'
       echo "                   \"Properties\": { \"Name\": \"multi-cluster-management-solution-guidance-${REGION}-${CLUSTERS_NAME}\","
