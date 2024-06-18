@@ -43,7 +43,7 @@ You can find below architecture diagrams of a sample Karmada based EKS Cluster a
 <!-- {% include image.html file="mcm_ekskarmada_images/karmada_ref_architecture1a.jpg" alt="Karmada cluster architecture" %} -->
 <img src="multi-cluster-application-management-with-karmada-and-amazon-eks-karmada-control-plane.png" width=70%>  
 <br/>
-<i>Figure 1: Multi-cluster application management with Amazon EKS and Karmada on AWS - Karmada control plane and managed clusters provisioning</i>
+<i>Figure 1: Multi-cluster application management with Amazon EKS and Karmada - Karmada control plane and managed clusters </i>
 </div>
 <br/>
 1. User interacts with the Karmada API server (part of Karmada Control Plane) using the `kubectl` utility with the Karmada plugin and a Network Load Balancer as the endpoint.<br/>
@@ -56,21 +56,21 @@ You can find below architecture diagrams of a sample Karmada based EKS Cluster a
 <!-- {% include image.html file="mcm_ekskarmada_images/karmada_reference_architecture2a.jpg" alt="Karmada application deployment architecture" %} -->
 <img src="multi-cluster-application-management-with-karmada-and-amazon-eks-karmada-managed-amazon-eks-cluster.png" width=70%> 
 <br/>
-<i>Figure 2: Multi-cluster application management with Amazon EKS and Karmada on AWS - Application deployment </i>
+<i>Figure 2: Multi-cluster application management with Amazon EKS and Karmada - Application deployment </i>
 </div>
 
 <br/>
-1. User interacts with the Karmada API server (part of Karmada Control Plane) using the kubectl CLI with the Karmada plugin. User sends a command for multiple clusters, ex. a multi-region deployment of [NGNIX](nginx.com) application with  equal weight across two member EKS clusters.<br/>
+1. User interacts with the Karmada API server (part of Karmada Control Plane) using the `kubectl` CLI with the Karmada plugin. User sends a command for multiple clusters, ex. a multi-region deployment of [NGNIX](nginx.com) application with  equal weight across two member EKS clusters.<br/>
 2. The Karmada Control Plane maintains the status and state of all member EKS clusters. Upon receiving the user request it interprets the requirement and instructs member clusters accordingly (e.g. run an NGINX deployment in each member cluster).<br/>
 3. The EKS cluster member 1 receives instructions from Karmada Control Plane to deploy and run an NGINX container application deployment.<br/>
 4. The EKS cluster member 2 receives instructions from Karmada Control Plane to deploy and run an NGINX container application deployment.<br/>
 5. The EKS Karmada Control Plane cluster checks application deployment status on the member clusters and updates state in its etcd database.<br/>
-6. User validates the status of multi-cluster application deployment communicating with Karmada Control Plane via kubectl Karmada CLI.<br/>
+6. User validates the status of multi-cluster application deployment communicating with Karmada Control Plane via `kubectl` Karmada CLI.<br/>
 <br/><br/>
 Following this architecture, you should be able to:
 
-- Deploy applications on multiple Amazon EKS clusters that provide a highly available environment
-- Create the infrastructure that caters for workloads compliant with local regulation about data residency
+- Deploy containerized applications on multiple Amazon EKS clusters that provide a highly available environment
+- Create an infrastructure that caters to workloads compliant with local regulation about data residency
 
 <!-- ### Architecture workflow steps --> 
 
