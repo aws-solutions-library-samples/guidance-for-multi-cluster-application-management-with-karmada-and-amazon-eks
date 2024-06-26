@@ -43,7 +43,7 @@ You can find below architecture diagrams of a sample Karmada based EKS Cluster a
 
 <img src="multi-cluster-application-management-with-karmada-and-amazon-eks-karmada-control-plane.png" width=70%>  
 <br/>
-<i>Figure 1: Multi-cluster application management with Amazon EKS and Karmada - Karmada control plane and managed clusters </i>
+<i>Figure 1: Multi-cluster application management with Amazon EKS and Karmada - Control plane and managed clusters </i>
 </div>
 <br/>
 1. User interacts with the Karmada API server (part of Karmada Control Plane) using the `kubectl` utility with the Karmada plugin and a Network Load Balancer as the endpoint.<br/>
@@ -55,7 +55,7 @@ You can find below architecture diagrams of a sample Karmada based EKS Cluster a
 <div align="center">
 <img src="multi-cluster-application-management-with-karmada-and-amazon-eks-karmada-managed-amazon-eks-cluster.png" width=70%> 
 <br/>
-<i>Figure 2: Multi-cluster application management with Amazon EKS and Karmada - Application deployment </i>
+<i>Figure 2: Multi-cluster application management with Amazon EKS and Karmada - Application deployment to managed clusters </i>
 </div>
 
 <br/>
@@ -126,7 +126,7 @@ All resources deployed by this solution rely on inherent AWS security controls, 
 
 ## Supported AWS Regions
 
-The AWS services used for this guidance are supported in *all available AWS regions (TO VERIFY)*: 
+The AWS services used for this guidance are supported in *all available AWS regions*: 
 
 ## Quotas
 
